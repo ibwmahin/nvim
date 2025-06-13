@@ -8,5 +8,6 @@ return {
     css = { "prettier" },
     json = { "prettier" },
     lua = { "stylua" },
+    python = {"python"}
   },
 }

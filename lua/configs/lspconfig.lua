@@ -87,3 +87,9 @@ for server_name, config in pairs(servers) do
   config.capabilities = capabilities
   lspconfig[server_name].setup(config)
 end
+
+
+
+local lspconfig = require "lspconfig"
+
+lspconfig.pyright.setup {}
