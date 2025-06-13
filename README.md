@@ -7,7 +7,7 @@
 
 ## Features
 
-- Based on [NvChad](https://nvchad.com) — powerful, modular, and easy to customize
+- Based on [NvChad](https://nvchad.com/docs/quickstart/install) — powerful, modular, and easy to customize
 - Auto-completion and snippets powered by `nvim-cmp` and `LuaSnip`
 - Smooth scrolling and animated cursor effects for a modern editing experience
 - Beautiful and informative statusline (without `feline.nvim`)
