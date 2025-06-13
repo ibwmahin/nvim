@@ -1,13 +1,73 @@
 return {
-  --markdown-preview
+  -- new plugins setup gose form here
+
   {
-    "iamcco/markdown-preview.nvim",
-    build = "cd app && npm install",
-    ft = { "markdown" },
+    "karb94/neoscroll.nvim",
+    event = "WinScrolled",
     config = function()
-      vim.g.mkdp_auto_start = 1
+      require("neoscroll").setup {
+        -- All defaults, see docs for options
+        easing_function = "cubic",
+      }
     end,
   },
+  -- better popup error for the neovim like webstrom
+
+  {
+    "rcarriga/nvim-notify",
+    lazy = true,
+    opts = {
+      stages = "fade_in_slide_out",
+      timeout = 2000,
+      background_colour = "#1e1e2e",
+    },
+    config = function(_, opts)
+      require("notify").setup(opts)
+      vim.notify = require "notify"
+    end,
+  },
+
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "rcarriga/nvim-notify",
+    },
+    config = function()
+      require("noice").setup {
+        lsp = {
+          override = {
+            ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+            ["vim.lsp.util.stylize_markdown"] = true,
+            ["cmp.entry.get_documentation"] = true,
+          },
+        },
+        presets = {
+          bottom_search = true,
+          command_palette = true,
+          long_message_to_split = true,
+          lsp_doc_border = true,
+        },
+      }
+    end,
+  },
+
+  -- indent code
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    event = "BufReadPost",
+    opts = {
+      indent = { char = "│" },
+      scope = { enabled = true },
+      exclude = {
+        filetypes = { "help", "dashboard", "lazy", "NvimTree" },
+        buftypes = { "terminal" },
+      },
+    },
+  },
+   -- new plugins setup ends here
 
   -- javascript debuggin
   {
@@ -41,12 +101,13 @@ return {
   },
 
   -- SmoothCursor configus gose form here
+
   {
     "gen740/SmoothCursor.nvim",
     event = "VeryLazy",
     config = function()
       require("smoothcursor").setup {
-        type = "default", -- You can also try "exp" or "matrix"
+        type = "default", -- try "exp" or "matrix" if you want
         fancy = {
           enable = true,
           head = { cursor = "➤", hl = "SmoothCursor" },
@@ -57,11 +118,12 @@ return {
           },
           tail = { cursor = ".", hl = "SmoothCursorAqua" },
         },
+        -- optionally, you can add:
+        disabled_filetypes = { "NvimTree", "TelescopePrompt" },
       }
-      -- DO NOT call .enable(), it's not needed anymore
+      -- DO NOT call require("smoothcursor").enable() here
     end,
   },
-
   -- Tailwind CSS Colorizer for cmp
   {
     "roobert/tailwindcss-colorizer-cmp.nvim",
