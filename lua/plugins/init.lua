@@ -1,4 +1,17 @@
 return {
+  --codeium
+  {
+    "Exafunction/codeium.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "hrsh7th/nvim-cmp",
+    },
+    event = "InsertEnter",
+    config = function()
+      require("codeium").setup {}
+    end,
+  },
+
   -- new plugins setup gose form here
 
   {
