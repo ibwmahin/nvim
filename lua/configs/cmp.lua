@@ -20,7 +20,6 @@ cmp.setup {
     ["<CR>"] = cmp.mapping.confirm { select = true },
   },
   sources = cmp.config.sources {
-    { name = "codeium", group_index = 2 }, -- ✅ Codeium AI suggestions
     { name = "nvim_lsp" },
     { name = "luasnip" },
     { name = "path" },
