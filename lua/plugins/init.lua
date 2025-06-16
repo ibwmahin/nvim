@@ -18,7 +18,7 @@ return {
     lazy = true,
     opts = {
       stages = "fade_in_slide_out",
-      timeout = 2000,
+      timeout = 1000,
       background_colour = "#1e1e2e",
     },
     config = function(_, opts)
@@ -67,7 +67,7 @@ return {
       },
     },
   },
-   -- new plugins setup ends here
+  -- new plugins setup ends here
 
   -- javascript debuggin
   {
