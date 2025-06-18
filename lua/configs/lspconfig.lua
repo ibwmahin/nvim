@@ -10,6 +10,12 @@ local on_attach = function(client, bufnr)
   bufmap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>")
   bufmap("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<CR>")
   bufmap("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<CR>")
+
+  -- ✅ Add nvim-navic breadcrumb support
+  local navic_ok, navic = pcall(require, "nvim-navic")
+  if navic_ok and client.server_capabilities.documentSymbolProvider then
+    navic.attach(client, bufnr)
+  end
 end
 
 -- Treesitter setup (without autotag here)
@@ -18,22 +24,24 @@ require("nvim-treesitter.configs").setup {
   highlight = { enable = true },
 }
 
--- Setup nvim-ts-autotag separately (already done in plugins, but good to call here as well)
+-- Setup nvim-ts-autotag separately
 require("nvim-ts-autotag").setup()
 
 -- Mason setup
 require("mason").setup()
 
--- Mason-lspconfig setup: automatically install listed servers
+-- Mason-lspconfig setup
 require("mason-lspconfig").setup {
   ensure_installed = {
-    "ts_ls", -- TypeScript/JavaScript LSP
+    "ts_ls", -- TypeScript/JavaScript
     "html",
     "cssls",
     "jsonls",
     "lua_ls",
     "emmet_ls",
     "tailwindcss",
+    "pyright", -- ✅ Python
+    "eslint", -- ✅ Linting for Next.js
   },
 }
 
@@ -42,7 +50,7 @@ local lspconfig = require "lspconfig"
 
 -- LSP server configurations
 local servers = {
-  ts_ls = {}, -- TypeScript + JavaScript
+  ts_ls = {}, -- TypeScript + JavaScript (kept untouched)
   html = {},
   cssls = {},
   jsonls = {},
@@ -50,10 +58,10 @@ local servers = {
     settings = {
       Lua = {
         diagnostics = {
-          globals = { "vim" }, -- To avoid "vim is undefined" warnings
+          globals = { "vim" },
         },
         workspace = {
-          library = vim.api.nvim_get_runtime_file("", true), -- Make the server aware of Neovim runtime files
+          library = vim.api.nvim_get_runtime_file("", true),
           checkThirdParty = false,
         },
         telemetry = {
@@ -77,9 +85,33 @@ local servers = {
     },
   },
   tailwindcss = {},
+
+  -- ✅ Python Support
+  pyright = {
+    filetypes = { "python" },
+    settings = {
+      python = {
+        analysis = {
+          typeCheckingMode = "basic",
+          autoSearchPaths = true,
+          useLibraryCodeForTypes = true,
+        },
+      },
+    },
+  },
+
+  -- ✅ ESLint for Next.js
+  eslint = {
+    filetypes = {
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact",
+    },
+  },
 }
 
--- Attach on_attach and capabilities to each server and setup
+-- Attach on_attach and capabilities to each server
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 for server_name, config in pairs(servers) do
@@ -88,8 +120,5 @@ for server_name, config in pairs(servers) do
   lspconfig[server_name].setup(config)
 end
 
-
-
-local lspconfig = require "lspconfig"
-
-lspconfig.pyright.setup {}
+-- ✅ Optional: Show breadcrumb in the winbar
+vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"

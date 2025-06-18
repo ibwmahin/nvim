@@ -1,5 +1,38 @@
 return {
-    -- new plugins setup gose form here
+
+  -- navic
+  {
+    "SmiteshP/nvim-navic",
+    lazy = true,
+    dependencies = { "neovim/nvim-lspconfig" },
+    config = function()
+      require("nvim-navic").setup {
+        highlight = true,
+        separator = " > ",
+        depth_limit = 5,
+        depth_limit_indicator = "..",
+      }
+    end,
+  },
+  -- utilyre/barbecue.nvim pluting adding here
+
+  {
+    "utilyre/barbecue.nvim",
+    name = "barbecue",
+    version = "*",
+    dependencies = {
+      "neovim/nvim-lspconfig",
+      "SmiteshP/nvim-navic", -- Context provider
+      "nvim-tree/nvim-web-devicons", -- Optional icon support
+    },
+    event = "VeryLazy",
+    config = function()
+      require("barbecue").setup {
+        attach_navic = true,
+      }
+    end,
+  },
+  -- new plugins setup gose form here
 
   {
     "karb94/neoscroll.nvim",
@@ -107,23 +140,29 @@ return {
     event = "VeryLazy",
     config = function()
       require("smoothcursor").setup {
-        type = "default", -- try "exp" or "matrix" if you want
+        cursor = "", -- Cool arrow shape as cursor head
+        texthl = "SmoothCursor",
         fancy = {
           enable = true,
-          head = { cursor = "➤", hl = "SmoothCursor" },
+          head = { cursor = "", texthl = "SmoothCursor" },
           body = {
-            { cursor = "•", hl = "SmoothCursorRed" },
-            { cursor = "•", hl = "SmoothCursorOrange" },
-            { cursor = ".", hl = "SmoothCursorYellow" },
+            { cursor = "•", texthl = "SmoothCursorRed" },
+            { cursor = "•", texthl = "SmoothCursorOrange" },
+            { cursor = "·", texthl = "SmoothCursorYellow" },
+            { cursor = "·", texthl = "SmoothCursorGreen" },
+            { cursor = "·", texthl = "SmoothCursorAqua" },
           },
-          tail = { cursor = ".", hl = "SmoothCursorAqua" },
+          tail = { cursor = "·", texthl = "SmoothCursorBlue" },
         },
-        -- optionally, you can add:
-        disabled_filetypes = { "NvimTree", "TelescopePrompt" },
+        interval = 50,
+        timeout = 800,
+        priority = 10,
+        enable_cursor_animation = true,
+        enable_cursor_flashing = false, -- disable flash, keep smooth only
       }
-      -- DO NOT call require("smoothcursor").enable() here
     end,
   },
+
   -- Tailwind CSS Colorizer for cmp
   {
     "roobert/tailwindcss-colorizer-cmp.nvim",
