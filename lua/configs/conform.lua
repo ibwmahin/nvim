@@ -12,14 +12,14 @@ local options = {
   -- },
 }
 
-require("conform").setup({
+require("conform").setup {
   formatters_by_ft = {
-    javascript  = { "prettierd" },
-    typescript  = { "prettierd" },
-    css         = { "prettierd" },
-    lua         = { "stylua" },
-    python      = { "black" },
+    javascript = { "prettierd" },
+    typescript = { "prettierd" },
+    css = { "prettierd" },
+    lua = { "stylua" },
+    python = { "black" },
   },
   format_on_save = true,
-})
+}
 return options
