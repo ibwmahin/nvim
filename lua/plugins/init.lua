@@ -1,4 +1,23 @@
 return {
+  -- mini map
+
+  {
+    "wfxr/minimap.vim",
+    build = "cargo install --locked code-minimap",
+    cmd = { "Minimap", "MinimapToggle", "MinimapRefresh", "MinimapClose" },
+    init = function()
+      vim.g.minimap_width = 10
+      vim.g.minimap_auto_start = 1
+      vim.g.minimap_auto_start_win_enter = 1
+      vim.g.minimap_highlight_range = 1
+      vim.g.minimap_git_colors = 1
+    end,
+  },
+
+  vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = "*",
+    command = "silent! Minimap",
+  }),
   {
     "stevearc/conform.nvim",
     -- event = 'BufWritePre', -- uncomment for format on save
