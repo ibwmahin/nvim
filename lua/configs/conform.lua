@@ -1,13 +1,25 @@
-return {
+local options = {
   formatters_by_ft = {
-    javascript = { "prettier" },
-    typescript = { "prettier" },
-    javascriptreact = { "prettier" },
-    typescriptreact = { "prettier" },
-    html = { "prettier" },
-    css = { "prettier" },
-    json = { "prettier" },
     lua = { "stylua" },
-    python = {"python"}
+    -- css = { "prettier" },
+    -- html = { "prettier" },
   },
+
+  -- format_on_save = {
+  --   -- These options will be passed to conform.format()
+  --   timeout_ms = 500,
+  --   lsp_fallback = true,
+  -- },
 }
+
+require("conform").setup({
+  formatters_by_ft = {
+    javascript  = { "prettierd" },
+    typescript  = { "prettierd" },
+    css         = { "prettierd" },
+    lua         = { "stylua" },
+    python      = { "black" },
+  },
+  format_on_save = true,
+})
+return options
