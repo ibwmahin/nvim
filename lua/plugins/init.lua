@@ -49,6 +49,14 @@ return {
     config = function()
       require("noice").setup {
         lsp = {
+          hover = {
+            enabled = true,
+            silent = true, -- prevents focus stealing
+            view = "hover", -- optional: uses normal hover popup
+          },
+          signature = {
+            enabled = false, -- turn off function signature popups while typing
+          },
           override = {
             ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
             ["vim.lsp.util.stylize_markdown"] = true,

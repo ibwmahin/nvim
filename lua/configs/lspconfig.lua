@@ -44,3 +44,8 @@ for name, cfg in pairs(servers) do
   cfg.capabilities = capabilities
   lspconfig[name].setup(cfg)
 end
+
+-- Disable automatic hover when typing
+vim.cmd [[autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })]]
+
+vim.cmd [[autocmd! CursorHold *]]
