@@ -1,4 +1,13 @@
 return {
+  -- bufwritepre
+
+  {
+    "stevearc/conform.nvim",
+    event = "BufWritePre",
+    config = function()
+      require("configs.conform") -- make sure this file exists!
+    end,
+  },
   -- mason tool installer
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
@@ -116,7 +125,7 @@ return {
         lsp = {
           hover = {
             enabled = true,
-            silent = true, -- prevents focus stealing
+            silent = true,  -- prevents focus stealing
             view = "hover", -- optional: uses normal hover popup
           },
           signature = {
@@ -148,15 +157,15 @@ return {
   { "folke/lazy.nvim" },
 
   -- Colorschemes
-  { "folke/tokyonight.nvim", lazy = false, priority = 1000 },
-  { "catppuccin/nvim", name = "catppuccin", lazy = false, priority = 1000 },
+  { "folke/tokyonight.nvim", lazy = false,        priority = 1000 },
+  { "catppuccin/nvim",       name = "catppuccin", lazy = false,   priority = 1000 },
 
   -- Dashboard, Terminal, Notifications
 
   {
     "folke/snacks.nvim",
     priority = 1000, -- load early for dashboard UI
-    lazy = false, -- load immediately on start
+    lazy = false,    -- load immediately on start
     opts = {
       dashboard = { enabled = true },
       notifier = { enabled = true },
@@ -175,7 +184,7 @@ return {
   },
 
   -- Keybinding popup
-  { "folke/which-key.nvim", config = true },
+  { "folke/which-key.nvim",                        config = true },
 
   -- Fuzzy Finder + fzf
   {
@@ -283,14 +292,14 @@ return {
   -- },
 
   -- Git Integration
-  { "lewis6991/gitsigns.nvim", event = "BufReadPre", config = true },
+  { "lewis6991/gitsigns.nvim",   event = "BufReadPre",                         config = true },
 
   -- Search & Replace
-  { "MagicDuck/grug-far.nvim", config = true },
-  { "folke/flash.nvim", event = "VeryLazy", opts = {} },
+  { "MagicDuck/grug-far.nvim",   config = true },
+  { "folke/flash.nvim",          event = "VeryLazy",                           opts = {} },
 
   -- Diagnostics UI
-  { "folke/trouble.nvim", dependencies = "nvim-tree/nvim-web-devicons", config = true },
+  { "folke/trouble.nvim",        dependencies = "nvim-tree/nvim-web-devicons", config = true },
 
   -- Statusline
   { "nvim-lualine/lualine.nvim", config = true },
@@ -302,10 +311,10 @@ return {
     config = function()
       require("lualine").setup {
         options = {
-          theme = "auto", -- auto picks your colorscheme
+          theme = "auto",          -- auto picks your colorscheme
           section_separators = "", -- clean separators
           component_separators = "",
-          globalstatus = true, -- one statusline for all windows (Neovim 0.7+)
+          globalstatus = true,     -- one statusline for all windows (Neovim 0.7+)
         },
         sections = {
           lualine_a = { "mode" },
@@ -321,7 +330,7 @@ return {
 
   -- Commenting & Text Objects
   { "echasnovski/mini.comment", event = "VeryLazy", config = true },
-  { "echasnovski/mini.ai", event = "VeryLazy", config = true },
+  { "echasnovski/mini.ai",      event = "VeryLazy", config = true },
 
   -- Smooth Cursor + Smooth Scrolling
   {
@@ -352,7 +361,7 @@ return {
   },
 
   -- Breadcrumbs
-  { "SmiteshP/nvim-navic", dependencies = "neovim/nvim-lspconfig", lazy = true, config = true },
+  { "SmiteshP/nvim-navic",                    dependencies = "neovim/nvim-lspconfig", lazy = true, config = true },
   {
     "utilyre/barbecue.nvim",
     event = "VeryLazy",
