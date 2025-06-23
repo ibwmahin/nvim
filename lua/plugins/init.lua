@@ -1,4 +1,75 @@
 return {
+  -- mason tool installer
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("mason-tool-installer").setup {
+        ensure_installed = {
+          "pyright", -- Python LSP
+        },
+        auto_update = true,
+        run_on_start = true,
+      }
+    end,
+  },
+  -- Python LSP Support
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+    },
+    opts = function(_, opts)
+      opts.servers = vim.tbl_deep_extend("force", opts.servers or {}, {
+        pyright = {}, -- Python Language Server
+      })
+    end,
+  },
+
+  -- 🧩 Folding with Treesitter + LSP (optional but powerful)
+  {
+    "kevinhwang91/nvim-ufo",
+    dependencies = "kevinhwang91/promise-async",
+    config = function()
+      require("ufo").setup()
+      vim.o.foldcolumn = "1"
+      vim.o.foldlevel = 99
+      vim.o.foldenable = true
+    end,
+  },
+  -- 🗂️ Project Manager
+  {
+    "ahmedkhalf/project.nvim",
+    config = function()
+      require("project_nvim").setup()
+      require("telescope").load_extension "projects"
+    end,
+  },
+  -- 🐞 DAP (Debugging Support)
+  {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      "rcarriga/nvim-dap-ui",
+      "theHamsta/nvim-dap-virtual-text",
+    },
+    config = function()
+      local dap = require "dap"
+      local dapui = require "dapui"
+      require("dapui").setup()
+      require("nvim-dap-virtual-text").setup()
+
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
+    end,
+  },
   -- These are some examples, uncomment them if you want to see them work!
   {
     "neovim/nvim-lspconfig",
@@ -179,7 +250,6 @@ return {
       lint.linters_by_ft = {
         javascript = { "eslint" },
         typescript = { "eslint" },
-        python = { "flake8" },
         lua = { "luacheck" },
         -- add more as needed
       }
