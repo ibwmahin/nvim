@@ -320,20 +320,23 @@ return {
     "gen740/SmoothCursor.nvim",
     event = "VeryLazy",
     config = function()
+      -- Define a single yellow shade for the cursor
+      vim.api.nvim_set_hl(0, "SmoothCursorYellow", { fg = "#FFD700" }) -- Golden yellow
+
       require("smoothcursor").setup {
-        cursor = "", -- Cool arrow shape as cursor head
-        texthl = "SmoothCursor",
+        cursor = "", -- Keep the cool arrow shape as default cursor
+        texthl = "SmoothCursorYellow",
         fancy = {
           enable = true,
-          head = { cursor = "", texthl = "SmoothCursor" },
+          head = { cursor = "▐", texthl = "SmoothCursorYellow" },
           body = {
-            { cursor = "•", texthl = "SmoothCursorRed" },
-            { cursor = "•", texthl = "SmoothCursorOrange" },
-            { cursor = "·", texthl = "SmoothCursorYellow" },
-            { cursor = "·", texthl = "SmoothCursorGreen" },
-            { cursor = "·", texthl = "SmoothCursorAqua" },
+            { cursor = "▆", texthl = "SmoothCursorYellow" },
+            { cursor = "▇", texthl = "SmoothCursorYellow" },
+            { cursor = "▉", texthl = "SmoothCursorYellow" },
+            { cursor = "▊", texthl = "SmoothCursorYellow" },
+            { cursor = "▌", texthl = "SmoothCursorYellow" },
           },
-          tail = { cursor = "·", texthl = "SmoothCursorBlue" },
+          tail = { cursor = "·", texthl = "SmoothCursorYellow" },
         },
         interval = 50,
         timeout = 800,
