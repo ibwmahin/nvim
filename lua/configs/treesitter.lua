@@ -1,18 +1,27 @@
+local M = {}
 
-return {
+M.opts = {
   ensure_installed = {
-    "bash","c","cpp","css","html","javascript","json","lua",
-    "markdown","python","typescript","tsx","vim","yaml"
+    "lua",
+    "vim",
+    "html",
+    "css",
+    "javascript",
+    "typescript",
+    "tsx",
+    "json",
   },
-  highlight = { enable = true },
-  indent    = { enable = true },
-  incremental_selection = {
+  highlight = {
     enable = true,
-    keymaps = {
-      init_selection = "<C-space>",
-      node_incremental = "<C-space>",
-      scope_incremental = "<C-s>",
-      node_decremental = "<M-space>",
-    },
+    additional_vim_regex_highlighting = false,
+  },
+  autotag = {
+    enable = true,
+  },
+  indent = {
+    enable = true,
   },
 }
+
+return M
+

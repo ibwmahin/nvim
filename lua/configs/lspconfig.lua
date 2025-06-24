@@ -1,51 +1,127 @@
-require("nvchad.configs.lspconfig").defaults()
-
-local servers = { "html", "cssls" }
-vim.lsp.enable(servers)
-
--- read :h vim.lsp.config for changing options of lsp servers
-
-local lspconfig = require "lspconfig"
+-- LSP keymaps setup function
 local on_attach = function(client, bufnr)
-  local map = vim.api.nvim_buf_set_keymap
-  local opts = { noremap = true, silent = true }
-  map(bufnr, "n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-  map(bufnr, "n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
-  map(bufnr, "n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-  map(bufnr, "n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
-  -- Attach breadcrumbs
-  if client.server_capabilities.documentSymbolProvider then
-    require("nvim-navic").attach(client, bufnr)
+  local bufmap = function(mode, lhs, rhs)
+    vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, { noremap = true, silent = true })
+  end
+
+  bufmap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
+  bufmap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
+  bufmap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>")
+  bufmap("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>")
+  bufmap("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<CR>")
+  bufmap("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<CR>")
+
+  -- ✅ Add nvim-navic breadcrumb support
+  local navic_ok, navic = pcall(require, "nvim-navic")
+  if navic_ok and client.server_capabilities.documentSymbolProvider then
+    navic.attach(client, bufnr)
   end
 end
 
-local has_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-local capabilities = has_cmp and cmp_nvim_lsp.default_capabilities()
-  or vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), {})
-local servers = {
-  html = {},
-  cssls = {},
-  ts_ls = {},
-  tailwindcss = {},
-  jsonls = {},
-  emmet_ls = {},
-  eslint = {},
-  pyright = {},
-  lua_ls = {
-    settings = { Lua = { diagnostics = { globals = { "vim" } } } },
+-- Treesitter setup (without autotag here)
+-- require("nvim-treesitter.configs").setup {
+--   ensure_installed = { "lua", "html", "css", "javascript", "typescript", "tsx" },
+--   highlight = { enable = true },
+-- }
+--
+-- Setup nvim-ts-autotag separately
+require("nvim-ts-autotag").setup()
+
+-- Mason setup
+require("mason").setup()
+
+-- Mason-lspconfig setup
+require("mason-lspconfig").setup {
+  ensure_installed = {
+    "ts_ls", -- TypeScript/JavaScript
+    "html",
+    "cssls",
+    "jsonls",
+    "lua_ls",
+    "emmet_ls",
+    "tailwindcss",
+    "pyright", -- ✅ Python
+    "eslint", -- ✅ Linting for Next.js
   },
 }
 
-require("mason").setup()
-require("mason-lspconfig").setup { ensure_installed = vim.tbl_keys(servers) }
+-- Import lspconfig
+local lspconfig = require "lspconfig"
 
-for name, cfg in pairs(servers) do
-  cfg.on_attach = on_attach
-  cfg.capabilities = capabilities
-  lspconfig[name].setup(cfg)
+-- LSP server configurations
+local servers = {
+  ts_ls = {}, -- TypeScript + JavaScript (kept untouched)
+  html = {},
+  cssls = {},
+  jsonls = {},
+  lua_ls = {
+    settings = {
+      Lua = {
+        diagnostics = {
+          globals = { "vim" },
+        },
+        workspace = {
+          library = vim.api.nvim_get_runtime_file("", true),
+          checkThirdParty = false,
+        },
+        telemetry = {
+          enable = false,
+        },
+      },
+    },
+  },
+  emmet_ls = {
+    filetypes = {
+      "html",
+      "typescriptreact",
+      "javascriptreact",
+      "javascript",
+      "typescript",
+      "css",
+      "sass",
+      "scss",
+      "less",
+      "svelte",
+    },
+  },
+  tailwindcss = {},
+
+  -- ✅ Python Support
+  pyright = {
+    filetypes = { "python" },
+    settings = {
+      python = {
+        analysis = {
+          typeCheckingMode = "basic",
+          autoSearchPaths = true,
+          useLibraryCodeForTypes = true,
+        },
+      },
+    },
+  },
+
+  -- ✅ ESLint for Next.js
+  eslint = {
+    filetypes = {
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact",
+    },
+  },
+}
+
+-- Attach on_attach and capabilities to each server
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+lspconfig.ts_ls.setup {
+  capabilities = capabilities,
+}
+for server_name, config in pairs(servers) do
+  config.on_attach = on_attach
+  config.capabilities = capabilities
+  lspconfig[server_name].setup(config)
 end
 
--- Disable automatic hover when typing
-vim.cmd [[autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })]]
-
-vim.cmd [[autocmd! CursorHold *]]
+-- ✅ Optional: Show breadcrumb in the winbar
+vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"

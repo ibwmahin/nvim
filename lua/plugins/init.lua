@@ -1,91 +1,37 @@
 return {
-  -- bufwritepre
+  -- Git Integration
+  { "lewis6991/gitsigns.nvim", event = "BufReadPre", config = true },
 
+  -- Search & Replace
+  { "MagicDuck/grug-far.nvim", config = true },
+  { "folke/flash.nvim", event = "VeryLazy", opts = {} },
+
+  -- Diagnostics UI
+  { "folke/trouble.nvim", dependencies = "nvim-tree/nvim-web-devicons", config = true },
+
+  --linting gose from here
   {
-    "stevearc/conform.nvim",
-    event = "BufWritePre",
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
-      require("configs.conform") -- make sure this file exists!
-    end,
-  },
-  -- mason tool installer
-  {
-    "WhoIsSethDaniel/mason-tool-installer.nvim",
-    event = "VeryLazy",
-    config = function()
-      require("mason-tool-installer").setup {
-        ensure_installed = {
-          "pyright", -- Python LSP
-        },
-        auto_update = true,
-        run_on_start = true,
+      local lint = require "lint"
+
+      lint.linters_by_ft = {
+        javascript = { "eslint" },
+        typescript = { "eslint" },
+        lua = { "luacheck" },
+        -- add more as needed
       }
-    end,
-  },
-  -- Python LSP Support
-  {
-    "neovim/nvim-lspconfig",
-    dependencies = {
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-    },
-    opts = function(_, opts)
-      opts.servers = vim.tbl_deep_extend("force", opts.servers or {}, {
-        pyright = {}, -- Python Language Server
+
+      -- Run lint on save
+      vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+        callback = function()
+          require("lint").try_lint()
+        end,
       })
     end,
   },
 
-  -- 🧩 Folding with Treesitter + LSP (optional but powerful)
-  {
-    "kevinhwang91/nvim-ufo",
-    dependencies = "kevinhwang91/promise-async",
-    config = function()
-      require("ufo").setup()
-      vim.o.foldcolumn = "1"
-      vim.o.foldlevel = 99
-      vim.o.foldenable = true
-    end,
-  },
-  -- 🗂️ Project Manager
-  {
-    "ahmedkhalf/project.nvim",
-    config = function()
-      require("project_nvim").setup()
-      require("telescope").load_extension "projects"
-    end,
-  },
-  -- 🐞 DAP (Debugging Support)
-  {
-    "mfussenegger/nvim-dap",
-    dependencies = {
-      "rcarriga/nvim-dap-ui",
-      "theHamsta/nvim-dap-virtual-text",
-    },
-    config = function()
-      local dap = require "dap"
-      local dapui = require "dapui"
-      require("dapui").setup()
-      require("nvim-dap-virtual-text").setup()
-
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
-    end,
-  },
-  -- These are some examples, uncomment them if you want to see them work!
-  {
-    "neovim/nvim-lspconfig",
-    config = function()
-      require "configs.lspconfig"
-    end,
-  },
   -- which key nvim  gose from here
   {
     "folke/which-key.nvim",
@@ -112,7 +58,175 @@ return {
       }
     end,
   },
-  --noice.nvim using here
+
+  -- Statusline
+  { "nvim-lualine/lualine.nvim", config = true },
+
+  {
+    "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
+    dependencies = { "nvim-tree/nvim-web-devicons" }, -- optional for icons
+    config = function()
+      require("lualine").setup {
+        options = {
+          theme = "auto", -- auto picks your colorscheme
+          section_separators = "", -- clean separators
+          component_separators = "",
+          globalstatus = true, -- one statusline for all windows (Neovim 0.7+)
+        },
+        sections = {
+          lualine_a = { "mode" },
+          lualine_b = { "branch", "diff", "diagnostics" },
+          lualine_c = { "filename", "lsp_progress" },
+          lualine_x = { "encoding", "fileformat", "filetype" },
+          lualine_y = { "progress" },
+          lualine_z = { "location" },
+        },
+      }
+    end,
+  },
+
+  -- Commenting & Text Objects
+  { "echasnovski/mini.comment", event = "VeryLazy", config = true },
+  { "echasnovski/mini.ai", event = "VeryLazy", config = true },
+  -- Autocompletion
+
+  {
+    "hrsh7th/nvim-cmp",
+    event = "InsertEnter",
+    dependencies = {
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "hrsh7th/cmp-cmdline",
+      "onsails/lspkind-nvim",
+      "rafamadriz/friendly-snippets",
+    },
+    config = function()
+      local cmp = require "cmp"
+      local luasnip = require "luasnip"
+      local lspkind = require "lspkind"
+
+      require("luasnip.loaders.from_vscode").lazy_load()
+
+      cmp.setup {
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
+        mapping = cmp.mapping.preset.insert {
+          ["<Tab>"] = cmp.mapping.confirm { select = true },
+          ["<CR>"] = cmp.mapping.confirm { select = true },
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<C-e>"] = cmp.mapping.abort(),
+        },
+        formatting = {
+          format = lspkind.cmp_format {
+            mode = "symbol_text",
+            maxwidth = 50,
+            ellipsis_char = "...",
+          },
+        },
+        sources = cmp.config.sources {
+          { name = "nvim_lsp" },
+          { name = "luasnip" },
+          { name = "buffer" },
+          { name = "path" },
+        },
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        },
+      }
+    end,
+  },
+  -- Dashboard, Terminal, Notifications
+
+  {
+    "folke/snacks.nvim",
+    priority = 1000, -- load early for dashboard UI
+    lazy = false, -- load immediately on start
+    opts = {
+      dashboard = { enabled = true },
+      notifier = { enabled = true },
+      terminal = { enabled = true },
+      explorer = { enabled = false },
+      indent = { enabled = true },
+      input = { enabled = true },
+      picker = { enabled = true },
+      quickfile = { enabled = true },
+      scroll = { enabled = true },
+      statuscolumn = { enabled = true },
+      words = { enabled = true },
+      bigfile = { enabled = true },
+      scope = { enabled = true },
+    },
+  },
+
+  -- navic is for the breadcumbs
+  {
+    "SmiteshP/nvim-navic",
+    lazy = true,
+    dependencies = { "neovim/nvim-lspconfig" },
+    config = function()
+      require("nvim-navic").setup {
+        highlight = true,
+        separator = " > ",
+        depth_limit = 5,
+        -- theme = auto,
+        depth_limit_indicator = "..",
+      }
+    end,
+  },
+  -- utilyre/barbecue.nvim pluting adding here
+
+  {
+    "utilyre/barbecue.nvim",
+    name = "barbecue",
+    version = "*",
+    dependencies = {
+      "neovim/nvim-lspconfig",
+      "SmiteshP/nvim-navic", -- Context provider
+      "nvim-tree/nvim-web-devicons", -- Optional icon support
+    },
+    event = "VeryLazy",
+    config = function()
+      require("barbecue").setup {
+        attach_navic = true,
+      }
+    end,
+  },
+  -- new plugins setup gose form here
+
+  {
+    "karb94/neoscroll.nvim",
+    event = "WinScrolled",
+    config = function()
+      require("neoscroll").setup {
+        -- All defaults, see docs for options
+        easing_function = "cubic",
+      }
+    end,
+  },
+  -- better popup error for the neovim like webstrom
+
+  {
+    "rcarriga/nvim-notify",
+    lazy = true,
+    opts = {
+      stages = "fade_in_slide_out",
+      timeout = 1000,
+      background_colour = "#1e1e2e",
+    },
+    config = function(_, opts)
+      require("notify").setup(opts)
+      vim.notify = require "notify"
+    end,
+  },
+  --noice nvim lua file gose form here
   {
     "folke/noice.nvim",
     event = "VeryLazy",
@@ -125,7 +239,7 @@ return {
         lsp = {
           hover = {
             enabled = true,
-            silent = true,  -- prevents focus stealing
+            silent = true, -- prevents focus stealing
             view = "hover", -- optional: uses normal hover popup
           },
           signature = {
@@ -146,74 +260,137 @@ return {
       }
     end,
   },
-
+  -- notification
   {
     "rcarriga/nvim-notify",
     config = function()
       vim.notify = require "notify"
     end,
   },
-  -- Plugin manager
-  { "folke/lazy.nvim" },
-
-  -- Colorschemes
-  { "folke/tokyonight.nvim", lazy = false,        priority = 1000 },
-  { "catppuccin/nvim",       name = "catppuccin", lazy = false,   priority = 1000 },
-
-  -- Dashboard, Terminal, Notifications
-
+  -- indent code
   {
-    "folke/snacks.nvim",
-    priority = 1000, -- load early for dashboard UI
-    lazy = false,    -- load immediately on start
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    event = "BufReadPost",
     opts = {
-      dashboard = { enabled = true },
-      notifier = { enabled = true },
-      terminal = { enabled = true },
-      explorer = { enabled = false },
-      indent = { enabled = true },
-      input = { enabled = true },
-      picker = { enabled = true },
-      quickfile = { enabled = true },
-      scroll = { enabled = true },
-      statuscolumn = { enabled = true },
-      words = { enabled = true },
-      bigfile = { enabled = true },
+      indent = { char = "│" },
       scope = { enabled = true },
+      exclude = {
+        filetypes = { "help", "dashboard", "lazy", "NvimTree" },
+        buftypes = { "terminal" },
+      },
     },
   },
+  -- new plugins setup ends here
 
-  -- Keybinding popup
-  { "folke/which-key.nvim",                        config = true },
+  -- javascript debuggin
+  {
+    "mxsdev/nvim-dap-vscode-js",
+    dependencies = { "mfussenegger/nvim-dap" },
+    config = function()
+      require("dap-vscode-js").setup {
+        debugger_path = vim.fn.stdpath "data" .. "/mason/packages/js-debug-adapter",
+        adapters = { "pwa-node", "pwa-chrome", "pwa-msedge" },
+      }
+    end,
+  },
+  -- luabetter auto complition
 
-  -- Fuzzy Finder + fzf
+  {
+    "vuki656/package-info.nvim",
+    dependencies = "MunifTanjim/nui.nvim",
+    ft = "json",
+    config = function()
+      require("package-info").setup()
+    end,
+  },
+  -- sstatu line & tabline
+  {
+    "nvim-lualine/lualine.nvim",
+    config = function()
+      require("lualine").setup {
+        options = { theme = "auto", section_separators = "", component_separators = "" },
+      }
+    end,
+  },
+
+  -- SmoothCursor configus gose form here
+
+  {
+    "gen740/SmoothCursor.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("smoothcursor").setup {
+        cursor = "", -- Cool arrow shape as cursor head
+        texthl = "SmoothCursor",
+        fancy = {
+          enable = true,
+          head = { cursor = "", texthl = "SmoothCursor" },
+          body = {
+            { cursor = "•", texthl = "SmoothCursorRed" },
+            { cursor = "•", texthl = "SmoothCursorOrange" },
+            { cursor = "·", texthl = "SmoothCursorYellow" },
+            { cursor = "·", texthl = "SmoothCursorGreen" },
+            { cursor = "·", texthl = "SmoothCursorAqua" },
+          },
+          tail = { cursor = "·", texthl = "SmoothCursorBlue" },
+        },
+        interval = 50,
+        timeout = 800,
+        priority = 10,
+        enable_cursor_animation = true,
+        enable_cursor_flashing = false, -- disable flash, keep smooth only
+      }
+    end,
+  },
+  {
+    "karb94/neoscroll.nvim",
+    event = "WinScrolled",
+    config = function()
+      require("neoscroll").setup { easing_function = "cubic" }
+    end,
+  },
+  -- Tailwind CSS Colorizer for cmp
+  {
+    "roobert/tailwindcss-colorizer-cmp.nvim",
+    config = function()
+      require("tailwindcss-colorizer-cmp").setup {
+        color_square_width = 2,
+      }
+    end,
+  },
+  { "roobert/tailwindcss-colorizer-cmp.nvim", config = true },
+  -- Fuzzy Finder Telescope
   {
     "nvim-telescope/telescope.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope-fzf-native.nvim" },
+    tag = "0.1.4",
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
-      require("telescope").setup { extensions = { fzf = { fuzzy = true } } }
-      require("telescope").load_extension "fzf"
+      require("telescope").setup()
     end,
   },
 
-  -- Treesitter
+  -- Git signs
   {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
+    "lewis6991/gitsigns.nvim",
     config = function()
-      require("nvim-treesitter.configs").setup(require "configs.treesitter")
+      require("gitsigns").setup()
     end,
   },
-  { "nvim-treesitter/nvim-treesitter-textobjects", after = "nvim-treesitter" },
 
-  -- LSP + Mason
+  -- Formatter
+  {
+    "stevearc/conform.nvim",
+    event = "BufWritePre",
+    opts = require "configs.conform",
+  },
+
+  -- LSP and Mason
   {
     "neovim/nvim-lspconfig",
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
-      "WhoIsSethDaniel/mason-tool-installer.nvim",
     },
     config = function()
       require "configs.lspconfig"
@@ -227,175 +404,72 @@ return {
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-cmdline",
       "onsails/lspkind-nvim",
-      "rafamadriz/friendly-snippets",
     },
     config = function()
       require "configs.cmp"
     end,
   },
 
-  -- Formatting
+  -- Auto pairs
   {
-    "stevearc/conform.nvim",
-    event = "BufWritePre",
-    config = function()
-      require "configs.conform"
-    end,
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    opts = {},
   },
 
-  -- Linting
-
+  -- Auto tag close (nvim-ts-autotag) - configured separately below
   {
-    "mfussenegger/nvim-lint",
-    event = { "BufReadPre", "BufNewFile" },
+    "windwp/nvim-ts-autotag",
+    event = "InsertEnter",
     config = function()
-      local lint = require "lint"
-
-      lint.linters_by_ft = {
-        javascript = { "eslint" },
-        typescript = { "eslint" },
-        lua = { "luacheck" },
-        -- add more as needed
-      }
-
-      -- Run lint on save
-      vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-        callback = function()
-          require("lint").try_lint()
-        end,
-      })
-    end,
-  },
-
-  -- File Explorer
-  -- {
-  --   "nvim-tree/nvim-tree.lua",
-  --   dependencies = "nvim-tree/nvim-web-devicons",
-  --   cmd = { "NvimTreeToggle", "NvimTreeFocus" },
-  --   config = function()
-  --     require("nvim-tree").setup {
-  --       on_attach = function(bufnr)
-  --         local api = require "nvim-tree.api"
-  --         local opts = { buffer = bufnr, noremap = true, silent = true }
-  --         vim.keymap.set("n", "<C-h>", api.node.navigate.parent, opts)
-  --         vim.keymap.set("n", "<C-l>", api.node.open.edit, opts)
-  --         vim.keymap.set("n", "<C-j>", api.node.navigate.sibling.next, opts)
-  --         vim.keymap.set("n", "<C-k>", api.node.navigate.sibling.prev, opts)
-  --       end,
-  --     }
-  --   end,
-  -- },
-
-  -- Git Integration
-  { "lewis6991/gitsigns.nvim",   event = "BufReadPre",                         config = true },
-
-  -- Search & Replace
-  { "MagicDuck/grug-far.nvim",   config = true },
-  { "folke/flash.nvim",          event = "VeryLazy",                           opts = {} },
-
-  -- Diagnostics UI
-  { "folke/trouble.nvim",        dependencies = "nvim-tree/nvim-web-devicons", config = true },
-
-  -- Statusline
-  { "nvim-lualine/lualine.nvim", config = true },
-
-  {
-    "nvim-lualine/lualine.nvim",
-    event = "VeryLazy",
-    dependencies = { "nvim-tree/nvim-web-devicons" }, -- optional for icons
-    config = function()
-      require("lualine").setup {
-        options = {
-          theme = "auto",          -- auto picks your colorscheme
-          section_separators = "", -- clean separators
-          component_separators = "",
-          globalstatus = true,     -- one statusline for all windows (Neovim 0.7+)
-        },
-        sections = {
-          lualine_a = { "mode" },
-          lualine_b = { "branch", "diff", "diagnostics" },
-          lualine_c = { "filename", "lsp_progress" },
-          lualine_x = { "encoding", "fileformat", "filetype" },
-          lualine_y = { "progress" },
-          lualine_z = { "location" },
+      require("nvim-ts-autotag").setup {
+        filetypes = {
+          "html",
+          "javascriptreact",
+          "typescriptreact",
+          "vue",
+          "svelte",
+          "tsx",
+          "jsx",
+          "xml",
+          "php",
+          "markdown",
         },
       }
     end,
   },
 
-  -- Commenting & Text Objects
-  { "echasnovski/mini.comment", event = "VeryLazy", config = true },
-  { "echasnovski/mini.ai",      event = "VeryLazy", config = true },
-
-  -- Smooth Cursor + Smooth Scrolling
-  {
-    "gen740/SmoothCursor.nvim",
-    event = "VeryLazy",
-    config = function()
-      require("smoothcursor").setup {
-        fancy = {
-          enable = true,
-          head = { cursor = "", texthl = "SmoothCursor" },
-          body = {
-            { cursor = "•", texthl = "SmoothCursorRed" },
-            { cursor = "•", texthl = "SmoothCursorOrange" },
-            { cursor = "·", texthl = "SmoothCursorYellow" },
-          },
-          tail = { cursor = "·", texthl = "SmoothCursorBlue" },
-        },
-        enable_cursor_flashing = false,
-      }
-    end,
-  },
-  {
-    "karb94/neoscroll.nvim",
-    event = "WinScrolled",
-    config = function()
-      require("neoscroll").setup { easing_function = "cubic" }
-    end,
-  },
-
-  -- Breadcrumbs
-  { "SmiteshP/nvim-navic",                    dependencies = "neovim/nvim-lspconfig", lazy = true, config = true },
-  {
-    "utilyre/barbecue.nvim",
-    event = "VeryLazy",
-    dependencies = { "nvim-tree/nvim-web-devicons", "SmiteshP/nvim-navic" },
-    config = true,
-  },
-
-  -- Tailwind CSS color preview
-  { "roobert/tailwindcss-colorizer-cmp.nvim", config = true },
-
-  -- AI Autocomplete (free)
-  -- {
-  --   "Exafunction/codeium.vim",
-  --   event = "InsertEnter",
-  --   config = function()
-  --     vim.g.codeium_disable_bindings = 1
-  --     vim.keymap.set("i", "<C-CR>", function()
-  --       return vim.fn["codeium#Accept"]()
-  --     end, { expr = true })
-  --   end,
-  -- },
-  -- test new blink
-  { import = "nvchad.blink.lazyspec" },
-
+  -- Treesitter without autotag here
   {
     "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
     opts = {
       ensure_installed = {
-        "vim",
         "lua",
-        "vimdoc",
+        "vim",
         "html",
         "css",
+        "javascript",
+        "typescript",
+        "json",
       },
+      highlight = {
+        enable = true,
+      },
+      -- autotag removed here because handled by nvim-ts-autotag plugin
     },
+  },
+
+  -- Sidebar file explorer
+  {
+    "nvim-tree/nvim-tree.lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("nvim-tree").setup {}
+    end,
   },
 }
