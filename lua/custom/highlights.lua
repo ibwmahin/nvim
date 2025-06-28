@@ -4,7 +4,7 @@ local M = {}
 
 M.override = {
   -- Transparent for main editor
-  Normal = { bg = "NONE" },
+  -- Normal = { bg = "NONE" },
   -- NormalNC = { bg = "NONE" },
   -- NormalFloat = { bg = "NONE" },
   -- FloatBorder = { bg = "NONE" },
