@@ -2,8 +2,8 @@
 local M = {}
 
 M.base46 = {
-  theme = "tokyodark",
-  -- hl_override = require("custom.highlights").override,
+  theme = "vesper",
+  hl_override = require("custom.highlights").override,
   -- hl_override = {
   --   Comment = { italic = true },
   --   ["@comment"] = { italic = true },

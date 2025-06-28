@@ -1,4 +1,5 @@
 return {
+
   -- Git Integration
   { "lewis6991/gitsigns.nvim", event = "BufReadPre", config = true },
 
@@ -87,8 +88,24 @@ return {
   },
 
   -- Commenting & Text Objects
-  { "echasnovski/mini.comment", event = "VeryLazy", config = true },
+
+  {
+    "echasnovski/mini.comment",
+    event = "VeryLazy",
+    config = function()
+      require("mini.comment").setup {
+        options = {
+          custom_commentstring = function()
+            return require("ts_context_commentstring.internal").calculate_commentstring() or vim.bo.commentstring
+          end,
+        },
+      }
+    end,
+  },
+  -- { "echasnovski/mini.comment", event = "VeryLazy", config = true },
   { "echasnovski/mini.ai", event = "VeryLazy", config = true },
+  { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
+
   -- Autocompletion
 
   {
@@ -462,6 +479,12 @@ return {
       },
       highlight = {
         enable = true,
+      },
+      -- ADD THIS:
+
+      context_commentstring = {
+        enable = true,
+        enable_autocmd = false,
       },
       -- autotag removed here because handled by nvim-ts-autotag plugin
     },
