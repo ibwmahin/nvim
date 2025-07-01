@@ -2,7 +2,7 @@
 local M = {}
 
 M.base46 = {
-  theme = "solarized_osaka",
+  theme = "tokyodark",
   hl_override = require("custom.highlights").override,
   -- hl_override = {
   --   Comment = { italic = true },
