@@ -15,9 +15,9 @@ return {
       "rafamadriz/friendly-snippets",
     },
     config = function()
-      local cmp = require("cmp")
-      local lspkind = require("lspkind")
-      local luasnip = require("luasnip")
+      local cmp = require "cmp"
+      local lspkind = require "lspkind"
+      local luasnip = require "luasnip"
 
       require("luasnip.loaders.from_vscode").lazy_load()
 
@@ -81,25 +81,24 @@ return {
       "williamboman/mason-lspconfig.nvim",
     },
     config = function()
-      require("configs.lspconfig")
+      require "configs.lspconfig"
     end,
   },
-  { "williamboman/mason.nvim",           config = true },
+  { "williamboman/mason.nvim", config = true },
   { "williamboman/mason-lspconfig.nvim", config = true },
   { "jose-elias-alvarez/typescript.nvim" },
-
 
   {
     "stevearc/conform.nvim",
     event = "BufWritePre",
     config = function()
-      require("conform").setup(require("configs.conform"))
+      require("conform").setup(require "configs.conform")
     end,
   },
   {
     "nvimtools/none-ls.nvim",
     config = function()
-      require("configs.none-ls")
+      require "configs.none-ls"
     end,
   },
   {
@@ -125,10 +124,10 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     config = function()
-      require("configs.treesitter")
+      require "configs.treesitter"
     end,
   },
-  { "nvim-treesitter/nvim-treesitter-context",    config = true },
+  { "nvim-treesitter/nvim-treesitter-context", config = true },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
   {
     "windwp/nvim-ts-autotag",
@@ -168,9 +167,9 @@ return {
       require("notify").setup {
         background_colour = "#000000",
         stages = "fade_in_slide_out",
-        timeout = 3000,
+        timeout = 1000,
       }
-      vim.notify = require("notify")
+      vim.notify = require "notify"
     end,
   },
   {
@@ -182,10 +181,10 @@ return {
   {
     "akinsho/bufferline.nvim",
     config = function()
-      require("configs.bufferline")
+      require "configs.bufferline"
     end,
   },
-  { "folke/which-key.nvim",    config = true },
+  { "folke/which-key.nvim", config = true },
   {
     "nvim-tree/nvim-tree.lua",
     config = function()
@@ -219,7 +218,7 @@ return {
     end,
   },
   { "folke/tokyonight.nvim" },
-  { "catppuccin/nvim",         name = "catppuccin" },
+  { "catppuccin/nvim", name = "catppuccin" },
 
   --------------------------------------
   -- GIT & DEVTOOLS
@@ -234,16 +233,16 @@ return {
       require("package-info").setup()
     end,
   },
-  { "MagicDuck/grug-far.nvim",                     config = true },
+  { "MagicDuck/grug-far.nvim", config = true },
 
   --------------------------------------
   -- MISC UTILS
   --------------------------------------
-  { "echasnovski/mini.comment",                    version = "*" },
-  { "echasnovski/mini.ai",                         version = "*" },
-  { "echasnovski/mini.pairs",                      version = "*" },
-  { "echasnovski/mini.icons",                      version = "*" },
-  { "folke/persistence.nvim",                      event = "BufReadPre", config = true },
+  { "echasnovski/mini.comment", version = "*" },
+  { "echasnovski/mini.ai", version = "*" },
+  { "echasnovski/mini.pairs", version = "*" },
+  { "echasnovski/mini.icons", version = "*" },
+  { "folke/persistence.nvim", event = "BufReadPre", config = true },
   { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
   {
     "windwp/nvim-autopairs",
