@@ -1,4 +1,3 @@
-
 return {
   --------------------------------------
   -- CORE COMPLETION & LSP SUPPORT
@@ -85,15 +84,16 @@ return {
       require("configs.lspconfig")
     end,
   },
-  { "williamboman/mason.nvim", config = true },
+  { "williamboman/mason.nvim",           config = true },
   { "williamboman/mason-lspconfig.nvim", config = true },
   { "jose-elias-alvarez/typescript.nvim" },
+
 
   {
     "stevearc/conform.nvim",
     event = "BufWritePre",
     config = function()
-      require("configs.conform")
+      require("conform").setup(require("configs.conform"))
     end,
   },
   {
@@ -128,7 +128,7 @@ return {
       require("configs.treesitter")
     end,
   },
-  { "nvim-treesitter/nvim-treesitter-context", config = true },
+  { "nvim-treesitter/nvim-treesitter-context",    config = true },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
   {
     "windwp/nvim-ts-autotag",
@@ -185,7 +185,7 @@ return {
       require("configs.bufferline")
     end,
   },
-  { "folke/which-key.nvim", config = true },
+  { "folke/which-key.nvim",    config = true },
   {
     "nvim-tree/nvim-tree.lua",
     config = function()
@@ -219,7 +219,7 @@ return {
     end,
   },
   { "folke/tokyonight.nvim" },
-  { "catppuccin/nvim", name = "catppuccin" },
+  { "catppuccin/nvim",         name = "catppuccin" },
 
   --------------------------------------
   -- GIT & DEVTOOLS
@@ -234,16 +234,16 @@ return {
       require("package-info").setup()
     end,
   },
-  { "MagicDuck/grug-far.nvim", config = true },
+  { "MagicDuck/grug-far.nvim",                     config = true },
 
   --------------------------------------
   -- MISC UTILS
   --------------------------------------
-  { "echasnovski/mini.comment", version = "*" },
-  { "echasnovski/mini.ai", version = "*" },
-  { "echasnovski/mini.pairs", version = "*" },
-  { "echasnovski/mini.icons", version = "*" },
-  { "folke/persistence.nvim", event = "BufReadPre", config = true },
+  { "echasnovski/mini.comment",                    version = "*" },
+  { "echasnovski/mini.ai",                         version = "*" },
+  { "echasnovski/mini.pairs",                      version = "*" },
+  { "echasnovski/mini.icons",                      version = "*" },
+  { "folke/persistence.nvim",                      event = "BufReadPre", config = true },
   { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
   {
     "windwp/nvim-autopairs",
@@ -258,4 +258,3 @@ return {
     end,
   },
 }
-
