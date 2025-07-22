@@ -16,6 +16,7 @@ local servers = {
   "lua_ls",
   "tailwindcss",
   "eslint",
+  "emmet_ls",
 }
 
 -- Capabilities for nvim-cmp
@@ -64,6 +65,30 @@ if mason_lspconfig.setup_handlers then
       }
     end,
 
+    -- ✅ Emmet for HTML, JSX, CSS
+    ["emmet_ls"] = function()
+      lspconfig.emmet_ls.setup {
+        capabilities = capabilities,
+        filetypes = {
+          "html",
+          "css",
+          "scss",
+          "sass",
+          "javascript",
+          "javascriptreact",
+          "typescriptreact",
+          "vue",
+          "svelte",
+        },
+        init_options = {
+          html = {
+            options = {
+              ["bem.enabled"] = true,
+            },
+          },
+        },
+      }
+    end,
     -- ✅ TailwindCSS: Autocomplete for JSX, HTML, className, etc.
     ["tailwindcss"] = function()
       lspconfig.tailwindcss.setup {

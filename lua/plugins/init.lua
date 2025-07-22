@@ -1,4 +1,9 @@
 return {
+  -- Ai codium windsurf plugin addin here
+  {
+    "Exafunction/windsurf.vim",
+    event = "BufEnter",
+  },
   --------------------------------------
   -- CORE COMPLETION & LSP SUPPORT
   --------------------------------------
@@ -27,12 +32,44 @@ return {
             luasnip.lsp_expand(args.body)
           end,
         },
+
         mapping = cmp.mapping.preset.insert {
-          ["<Tab>"] = cmp.mapping.select_next_item(),
-          ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+          -- Regular Tab to navigate
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              luasnip.jump(-1)
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+
           ["<CR>"] = cmp.mapping.confirm { select = true },
+
           ["<C-Space>"] = cmp.mapping.complete(),
+
+          -- ✅ Codium AI: Accept suggestion on Ctrl-Tab
+          ["<C-]>"] = function()
+            if vim.fn["codeium#Accept"]() ~= "" then
+              return vim.fn.feedkeys(
+                vim.api.nvim_replace_termcodes("<C-r>=codeium#Accept()<CR>", true, true, true),
+                "n"
+              )
+            end
+          end,
         },
+
         formatting = {
           format = lspkind.cmp_format {
             mode = "symbol_text",

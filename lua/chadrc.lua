@@ -9,7 +9,7 @@ vim.cmd [[
 
 
 M.base46 = {
-  theme = "neofusion",
+  theme = "rosepine",
   hl_override = require("custom.highlights").override,
   -- hl_override = {
   --   Comment = { italic = true },
