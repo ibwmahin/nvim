@@ -6,10 +6,13 @@ vim.cmd [[
   highlight IndentBlanklineScopeChar guifg=#7aa2f7 gui=nocombine
 ]]
 
-
+M.options = {
+  relativenumber = true,
+  number = true,
+}
 
 M.base46 = {
-  theme = "rosepine",
+  theme = "chadracula",
   hl_override = require("custom.highlights").override,
   -- hl_override = {
   --   Comment = { italic = true },
