@@ -28,6 +28,12 @@ mason_lspconfig.setup {
   automatic_installation = true,
 }
 
+-- Fix: prevent signature popup from breaking insert mode
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+  silent = true,
+  focusable = false,
+  close_events = { "BufLeave", "CursorMoved", "InsertLeave", "InsertCharPre" },
+})
 -- Setup handlers for LSPs
 if mason_lspconfig.setup_handlers then
   mason_lspconfig.setup_handlers {
@@ -57,10 +63,14 @@ if mason_lspconfig.setup_handlers then
     end,
 
     -- TypeScript: Auto-import, file operations, etc.
+
     ["tsserver"] = function()
       require("typescript").setup {
         server = {
           capabilities = capabilities,
+          handlers = {
+            ["textDocument/signatureHelp"] = function() end, -- disable auto popup
+          },
         },
       }
     end,

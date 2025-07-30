@@ -187,6 +187,7 @@ return {
   --------------------------------------
   -- UI / UX
   --------------------------------------
+
   {
     "folke/noice.nvim",
     event = "VeryLazy",
@@ -195,7 +196,13 @@ return {
       "rcarriga/nvim-notify",
     },
     config = function()
-      require("noice").setup()
+      require("noice").setup {
+        lsp = {
+          signature = {
+            enabled = false, -- Disable LSP signature popups
+          },
+        },
+      }
     end,
   },
   {
@@ -277,15 +284,35 @@ return {
   --------------------------------------
   { "echasnovski/mini.comment", version = "*" },
   { "echasnovski/mini.ai", version = "*" },
-  { "echasnovski/mini.pairs", version = "*" },
-  { "echasnovski/mini.icons", version = "*" },
-  { "folke/persistence.nvim", event = "BufReadPre", config = true },
-  { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
+
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
-    config = true,
+    config = function()
+      require("nvim-autopairs").setup {
+        check_ts = true, -- treesitter-aware
+        map_cr = true,
+        map_bs = true,
+      }
+
+      -- Integrate with nvim-cmp
+      local cmp_autopairs = require "nvim-autopairs.completion.cmp"
+      local cmp = require "cmp"
+      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+    end,
   },
+  { "echasnovski/mini.icons", version = "*" },
+  { "folke/persistence.nvim", event = "BufReadPre", config = true },
+  { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
+  --
+  -- {
+  --   "windwp/nvim-autopairs",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     require "configs.nvim-autopairs"
+  --   end,
+  -- },
+
   {
     "j-hui/fidget.nvim",
     tag = "legacy",
