@@ -12,12 +12,12 @@ M.options = {
 }
 
 M.base46 = {
-  theme = "chadracula",
-  hl_override = require("custom.highlights").override,
-  -- hl_override = {
-  --   Comment = { italic = true },
-  --   ["@comment"] = { italic = true },
-  -- },
+  theme = "material-deep-ocean",
+  -- hl_override = require("custom.highlights").override,
+  hl_override = {
+    Comment = { italic = true },
+    ["@comment"] = { italic = true },
+  },
   transparency = true,
 }
 

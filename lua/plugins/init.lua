@@ -1,9 +1,9 @@
 return {
   -- Ai codium windsurf plugin addin here
-  {
-    "Exafunction/windsurf.vim",
-    event = "BufEnter",
-  },
+  -- {
+  --   "Exafunction/windsurf.vim",
+  --   event = "BufEnter",
+  -- },
   --------------------------------------
   -- CORE COMPLETION & LSP SUPPORT
   --------------------------------------
