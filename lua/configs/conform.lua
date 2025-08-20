@@ -5,20 +5,20 @@ local options = {
     lsp_fallback = true,
   },
 
-
   formatters_by_ft = {
-    lua = { "stylua" },
     javascript = { "prettier" },
     typescript = { "prettier" },
     javascriptreact = { "prettier" },
     typescriptreact = { "prettier" },
     json = { "prettier" },
-    css = { "prettier" },
     html = { "prettier" },
+    css = { "prettier" },
+    scss = { "prettier" },
+    yaml = { "prettier" },
     markdown = { "prettier" },
+    lua = { "stylua" },
     sh = { "shfmt" },
   },
-
 }
 
 return options

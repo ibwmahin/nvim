@@ -12,7 +12,7 @@ M.options = {
 }
 
 M.base46 = {
-  theme = "material-deep-ocean",
+  theme = "vesper",
   -- hl_override = require("custom.highlights").override,
   hl_override = {
     Comment = { italic = true },

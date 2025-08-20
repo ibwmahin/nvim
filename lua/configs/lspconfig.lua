@@ -89,6 +89,8 @@ if mason_lspconfig.setup_handlers then
           "typescriptreact",
           "vue",
           "svelte",
+          "tsx",
+          "jsx",
         },
         init_options = {
           html = {
