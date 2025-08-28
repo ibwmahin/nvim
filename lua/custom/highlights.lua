@@ -1,32 +1,46 @@
--- ~/.config/nvim/lua/custom/highlights.lua
-
+-- lua/chadrc.lua
+---@type ChadrcConfig
 local M = {}
 
+M.base46 = {
+  theme = "onedark",
 
-M.override = {
-  -- Transparent for main editor
-  Normal = { bg = "NONE" },
-  NormalNC = { bg = "NONE" },
-  NormalFloat = { bg = "NONE" },
-  FloatBorder = { bg = "NONE" },
-  VertSplit = { bg = "NONE" },
-  SignColumn = { bg = "NONE" },
-  MsgArea = { bg = "NONE" },
+  hl_override = {
+    Comment = { italic = true },
+    ["@comment"] = { italic = true },
 
-  -- Transparent statusline
-  StatusLine = { bg = "NONE" },
-  StatusLineNC = { bg = "NONE" },
+    -- Make editor background and top/tab/status/bufferline transparent
+    Normal = { bg = "NONE" },
 
-  -- Optional: transparent winbar
-  WinBar = { bg = "NONE" },
-  WinBarNC = { bg = "NONE" },
+    -- built-in Vim tabline groups
+    TabLine = { bg = "NONE" },
+    TabLineSel = { bg = "NONE" },
+    TabLineFill = { bg = "NONE" },
 
-  -- Sidebar & float windows
-  TelescopeNormal = { bg = "NONE" },
-  TelescopeBorder = { bg = "NONE" },
-  NvimTreeNormal = { bg = "NONE" },
-  NvimTreeNormalNC = { bg = "NONE" },
-  NvimTreeEndOfBuffer = { bg = "NONE" },
-  NvimTreeWinSeparator = { fg = "NONE", bg = "NONE" },
+    -- statusline / winbar
+    StatusLine = { bg = "NONE" },
+    StatusLineNC = { bg = "NONE" },
+
+    -- bufferline groups (bufferline.nvim / NvChad tabufline)
+    BufferLineFill = { bg = "NONE" },
+    BufferLineBackground = { bg = "NONE" },
+    BufferLineSeparator = { bg = "NONE" },
+    BufferLineIndicatorSelected = { bg = "NONE" },
+    BufferLineIndicatorVisible = { bg = "NONE" },
+    BufferLineGap = { bg = "NONE" },
+
+    -- nvchad tabufline specific attempt (some themes use custom groups)
+    Tabufline = { bg = "NONE" },
+    TabuflineFill = { bg = "NONE" },
+    TabuflineSel = { bg = "NONE" },
+  },
 }
+
+M.nvdash = { load_on_startup = true }
+M.ui = {
+  tabufline = {
+    lazyload = false,
+  },
+}
+
 return M

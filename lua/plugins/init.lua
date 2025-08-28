@@ -1,56 +1,214 @@
+-- cleaned plugins table for NvChad (replace your plugins/init.lua with this)
+-- Removes LazyVim-specific references, deduplicates plugins, guards optional features,
+-- and fixes events / configs so this loads cleanly in NvChad.
+
 return {
-  -- Ai codium windsurf plugin addin here
-  -- {
-  --   "Exafunction/windsurf.vim",
-  --   event = "BufEnter",
-  -- },
   --------------------------------------
-  -- CORE COMPLETION & LSP SUPPORT
+  -- TODO / SMALL UTILITIES
   --------------------------------------
+  {
+    "folke/todo-comments.nvim",
+    event = "BufReadPost",
+    opts = {},
+    keys = {
+      {
+        "]t",
+        function()
+          require("todo-comments").jump_next()
+        end,
+        desc = "Next Todo Comment",
+      },
+      {
+        "[t",
+        function()
+          require("todo-comments").jump_prev()
+        end,
+        desc = "Previous Todo Comment",
+      },
+      { "<leader>xt", "<cmd>Trouble todo toggle<cr>", desc = "Todo (Trouble)" },
+      { "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Todo (Telescope)" },
+      { "<leader>sT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme (Telescope)" },
+    },
+  },
 
   {
-    "karb94/neoscroll.nvim",
-    config = function()
-      require("neoscroll").setup {
-        -- Enable mappings for these keys:
-        mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
-        hide_cursor = true, -- Hide cursor while scrolling
-        stop_eof = true, -- Stop at EOF
-        respect_scrolloff = false, -- Don’t respect scrolloff when scrolling
-        cursor_scrolls_alone = true, -- Cursor follows scroll even if window doesn’t
-      }
+    "folke/lazydev.nvim",
+    ft = "lua",
+    cmd = "LazyDev",
+    opts = {
+      library = {
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+        { path = "LazyVim", words = { "LazyVim" } },
+        { path = "snacks.nvim", words = { "Snacks" } },
+        { path = "lazy.nvim", words = { "LazyVim" } },
+      },
+    },
+  },
 
-      local t = {}
+  {
+    "MagicDuck/grug-far.nvim",
+    cmd = "GrugFar",
+    opts = { headerMaxWidth = 80 },
+    keys = {
+      {
+        "<leader>sr",
+        function()
+          local ok, grug = pcall(require, "grug-far")
+          if not ok then
+            vim.notify("grug-far not installed", vim.log.levels.WARN)
+            return
+          end
+          local ext = vim.bo.buftype == "" and vim.fn.expand "%:e"
+          grug.open {
+            transient = true,
+            prefills = {
+              filesFilter = ext and ext ~= "" and "*." .. ext or nil,
+            },
+          }
+        end,
+        mode = { "n", "v" },
+        desc = "Search and Replace",
+      },
+    },
+  },
 
-      -- Half-page scroll up/down
-      t["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "150" } }
-      t["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "150" } }
+  --------------------------------------
+  -- MINI plugins (ai, pairs, comment)
+  --------------------------------------
+  -- {
+  --   "echasnovski/mini.ai",
+  --   event = "VeryLazy",
+  --   opts = function()
+  --     local ai = require "mini.ai"
+  --     return {
+  --       n_lines = 500,
+  --       custom_textobjects = {
+  --         o = ai.gen_spec.treesitter {
+  --           a = { "@block.outer", "@conditional.outer", "@loop.outer" },
+  --           i = { "@block.inner", "@conditional.inner", "@loop.inner" },
+  --         },
+  --         f = ai.gen_spec.treesitter { a = "@function.outer", i = "@function.inner" },
+  --         c = ai.gen_spec.treesitter { a = "@class.outer", i = "@class.inner" },
+  --         t = { "<([%p%w]-)%f[^<%w][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+  --         d = { "%f[%d]%d+" },
+  --         e = {
+  --           { "%u[%l%d]+%f[^%l%d]", "%f[%S][%l%d]+%f[^%l%d]", "%f[%P][%l%d]+%f[^%l%d]", "^[%l%d]+%f[^%l%d]" },
+  --           "^().*()$",
+  --         },
+  --         u = ai.gen_spec.function_call(),
+  --         U = ai.gen_spec.function_call { name_pattern = "[%w_]" },
+  --       },
+  --     }
+  --   end,
+  --   config = function(_, opts)
+  --     require("mini.ai").setup(opts)
+  --     -- optional which-key hints (guarded)
+  --     pcall(function()
+  --       local wk = require "which-key"
+  --       wk.register({
+  --         ["<leader>"] = { name = "Leader" },
+  --       }, { mode = "n" })
+  --     end)
+  --   end,
+  -- },
 
-      -- Full-page scroll up/down
-      t["<C-b>"] = { "scroll", { "-vim.api.nvim_win_get_height(0)", "true", "200" } }
-      t["<C-f>"] = { "scroll", { "vim.api.nvim_win_get_height(0)", "true", "200" } }
-
-      -- Line-by-line scrolling
-      t["<C-y>"] = { "scroll", { "-0.10", "false", "100" } }
-      t["<C-e>"] = { "scroll", { "0.10", "false", "100" } }
-
-      -- Centering
-      t["zt"] = { "zt", { "150" } }
-      t["zz"] = { "zz", { "150" } }
-      t["zb"] = { "zb", { "150" } }
-
-      require("neoscroll.config").set_mappings(t)
+  {
+    "echasnovski/mini.pairs",
+    event = "VeryLazy",
+    opts = {
+      modes = { insert = true, command = true, terminal = false },
+      skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+      skip_ts = { "string" },
+      skip_unbalanced = true,
+      markdown = true,
+    },
+    config = function(_, opts)
+      require("mini.pairs").setup(opts)
     end,
   },
 
   {
-    "xabikos/vscode-react",
-    ft = {
-      "javascript",
-      "typescript",
-    },
+    "echasnovski/mini.comment",
+    event = "VeryLazy",
+    version = "*",
+    config = function()
+      require("mini.comment").setup()
+    end,
   },
 
+  --------------------------------------
+  -- SMOOTH SCROLL
+  --------------------------------------
+
+  {
+    "karb94/neoscroll.nvim",
+    event = "VeryLazy",
+    config = function()
+      local ok, neoscroll = pcall(require, "neoscroll")
+      if not ok then
+        vim.notify("neoscroll not available", vim.log.levels.WARN)
+        return
+      end
+
+      -- Basic setup (you can leave mappings empty to avoid defaults)
+      neoscroll.setup {
+        -- disable default mappings (we'll set custom ones below)
+        mappings = {},
+      }
+
+      -- build a key->function table using neoscroll helper functions
+      local keymap = {
+        ["<C-u>"] = function()
+          neoscroll.ctrl_u { duration = 250 }
+        end,
+        ["<C-d>"] = function()
+          neoscroll.ctrl_d { duration = 250 }
+        end,
+        ["<C-b>"] = function()
+          neoscroll.ctrl_b { duration = 450 }
+        end,
+        ["<C-f>"] = function()
+          neoscroll.ctrl_f { duration = 450 }
+        end,
+
+        -- small scrolls: move_cursor=false so the view scrolls but cursor can stay
+        ["<C-y>"] = function()
+          neoscroll.scroll(-0.10, { move_cursor = false, duration = 100 })
+        end,
+        ["<C-e>"] = function()
+          neoscroll.scroll(0.10, { move_cursor = false, duration = 100 })
+        end,
+
+        -- center/top/bottom motions
+        ["zt"] = function()
+          neoscroll.zt { half_win_duration = 250 }
+        end,
+        ["zz"] = function()
+          neoscroll.zz { half_win_duration = 250 }
+        end,
+        ["zb"] = function()
+          neoscroll.zb { half_win_duration = 250 }
+        end,
+      }
+
+      -- register the mappings for normal, visual, and select modes
+      local modes = { "n", "v", "x" }
+      for key, fn in pairs(keymap) do
+        vim.keymap.set(modes, key, fn, { noremap = true, silent = true })
+      end
+    end,
+  },
+  --------------------------------------
+  -- React / snippets / frontend helpers
+  --------------------------------------
+  {
+    "xabikos/vscode-react",
+    ft = { "javascript", "typescript" },
+  },
+
+  --------------------------------------
+  -- COMPLETION (nvim-cmp) and snippets
+  --------------------------------------
   {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
@@ -64,25 +222,29 @@ return {
       "rafamadriz/friendly-snippets",
     },
     config = function()
-      local cmp = require "cmp"
-      local lspkind = require "lspkind"
-      local luasnip = require "luasnip"
-
-      require("luasnip.loaders.from_vscode").lazy_load()
+      local ok_cmp, cmp = pcall(require, "cmp")
+      if not ok_cmp then
+        return
+      end
+      local ok_lspkind, lspkind = pcall(require, "lspkind")
+      local ok_luasnip, luasnip = pcall(require, "luasnip")
+      if ok_luasnip then
+        require("luasnip.loaders.from_vscode").lazy_load()
+      end
 
       cmp.setup {
         snippet = {
           expand = function(args)
-            luasnip.lsp_expand(args.body)
+            if ok_luasnip then
+              luasnip.lsp_expand(args.body)
+            end
           end,
         },
-
         mapping = cmp.mapping.preset.insert {
-          -- Regular Tab to navigate
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
+            elseif ok_luasnip and luasnip.expand_or_jumpable() then
               luasnip.expand_or_jump()
             else
               fallback()
@@ -92,7 +254,7 @@ return {
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
+            elseif ok_luasnip and luasnip.jumpable(-1) then
               luasnip.jump(-1)
             else
               fallback()
@@ -100,26 +262,20 @@ return {
           end, { "i", "s" }),
 
           ["<CR>"] = cmp.mapping.confirm { select = true },
-
           ["<C-Space>"] = cmp.mapping.complete(),
-
-          -- ✅ Codium AI: Accept suggestion on Ctrl-Tab
-          ["<C-]>"] = function()
-            if vim.fn["codeium#Accept"]() ~= "" then
-              return vim.fn.feedkeys(
-                vim.api.nvim_replace_termcodes("<C-r>=codeium#Accept()<CR>", true, true, true),
-                "n"
-              )
+          -- guarded Codeium accept (only call if Codeium function exists)
+          ["<C-]>"] = cmp.mapping(function()
+            if vim.fn.exists "*codeium#Accept" == 1 and vim.fn["codeium#Accept"]() ~= "" then
+              vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<C-r>=codeium#Accept()<CR>", true, true, true), "n")
             end
-          end,
+          end),
         },
-
         formatting = {
-          format = lspkind.cmp_format {
+          format = (ok_lspkind and lspkind.cmp_format {
             mode = "symbol_text",
             maxwidth = 50,
             ellipsis_char = "...",
-          },
+          }) or nil,
         },
         sources = cmp.config.sources {
           { name = "nvim_lsp" },
@@ -146,9 +302,9 @@ return {
   {
     "roobert/tailwindcss-colorizer-cmp.nvim",
     config = function()
-      require("tailwindcss-colorizer-cmp").setup {
-        color_square_width = 2,
-      }
+      pcall(function()
+        require("tailwindcss-colorizer-cmp").setup { color_square_width = 2 }
+      end)
     end,
   },
 
@@ -162,9 +318,12 @@ return {
       "williamboman/mason-lspconfig.nvim",
     },
     config = function()
-      require "configs.lspconfig"
+      pcall(function()
+        require "configs.lspconfig"
+      end)
     end,
   },
+
   { "williamboman/mason.nvim", config = true },
   { "williamboman/mason-lspconfig.nvim", config = true },
   { "jose-elias-alvarez/typescript.nvim" },
@@ -173,65 +332,82 @@ return {
     "stevearc/conform.nvim",
     event = "BufWritePre",
     config = function()
-      require("conform").setup(require "configs.conform")
+      pcall(function()
+        require("conform").setup(require "configs.conform")
+      end)
     end,
   },
+
+  -- null-ls (guarded require so missing config file doesn't error)
   {
-    "nvimtools/none-ls.nvim",
+    "jose-elias-alvarez/null-ls.nvim",
+    event = "BufReadPre",
     config = function()
-      require "configs.none-ls"
+      pcall(function()
+        require "configs.none-ls"
+      end) -- keep your existing file name if you use it
     end,
   },
+
   {
     "mfussenegger/nvim-lint",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-      require("lint").linters_by_ft = {
-        javascript = { "eslint" },
-        typescript = { "eslint" },
-      }
-      vim.api.nvim_create_autocmd("BufWritePost", {
-        callback = function()
-          require("lint").try_lint()
-        end,
-      })
+      pcall(function()
+        require("lint").linters_by_ft = {
+          javascript = { "eslint" },
+          typescript = { "eslint" },
+        }
+        vim.api.nvim_create_autocmd("BufWritePost", {
+          callback = function()
+            require("lint").try_lint()
+          end,
+        })
+      end)
     end,
   },
 
   --------------------------------------
-  -- SYNTAX HIGHLIGHTING
+  -- SYNTAX & HIGHLIGHTING
   --------------------------------------
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     config = function()
-      require "configs.treesitter"
+      pcall(function()
+        require "configs.treesitter"
+      end)
     end,
   },
   { "nvim-treesitter/nvim-treesitter-context", config = true },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
+
   {
     "windwp/nvim-ts-autotag",
     event = "InsertEnter",
     config = function()
-      require("nvim-ts-autotag").setup()
+      pcall(function()
+        require("nvim-ts-autotag").setup()
+      end)
     end,
   },
+
   {
     "brenoprata10/nvim-highlight-colors",
     config = function()
-      require("nvim-highlight-colors").setup {
-        render = "background",
-        enable_named_colors = true,
-        enable_tailwind = true,
-      }
+      pcall(function()
+        require("nvim-highlight-colors").setup {
+          render = "background",
+          enable_named_colors = true,
+          enable_tailwind = true,
+        }
+      end)
     end,
   },
 
   --------------------------------------
   -- UI / UX
   --------------------------------------
-
   {
     "folke/noice.nvim",
     event = "VeryLazy",
@@ -240,128 +416,127 @@ return {
       "rcarriga/nvim-notify",
     },
     config = function()
-      require("noice").setup {
-        lsp = {
-          signature = {
-            enabled = false, -- Disable LSP signature popups
-          },
-        },
-      }
+      pcall(function()
+        require("noice").setup {
+          lsp = { signature = { enabled = false } },
+        }
+      end)
     end,
   },
+
   {
     "rcarriga/nvim-notify",
     config = function()
-      require("notify").setup {
-        background_colour = "#000000",
-        stages = "fade_in_slide_out",
-        timeout = 1000,
-      }
-      vim.notify = require "notify"
+      pcall(function()
+        require("notify").setup {
+          background_colour = "#000000",
+          stages = "fade_in_slide_out",
+          timeout = 1000,
+        }
+        vim.notify = require "notify"
+      end)
     end,
   },
+
   {
     "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
     config = function()
-      require("lualine").setup()
+      pcall(function()
+        require("lualine").setup()
+      end)
     end,
   },
+
   {
     "akinsho/bufferline.nvim",
+    event = "VeryLazy",
     config = function()
-      require "configs.bufferline"
+      pcall(function()
+        require "configs.bufferline"
+      end)
     end,
   },
-  { "folke/which-key.nvim", config = true },
+
+  { "folke/which-key.nvim", event = "VeryLazy", config = true },
+
+  -- keep NvChad default file explorer (nvim-tree)
   {
     "nvim-tree/nvim-tree.lua",
+    cmd = { "NvimTreeToggle", "NvimTreeOpen", "NvimTreeFocus" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      require("nvim-tree").setup {}
+      pcall(function()
+        require("nvim-tree").setup {}
+      end)
     end,
   },
+
   {
     "nvim-telescope/telescope.nvim",
     tag = "0.1.4",
     dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = "Telescope",
     config = function()
-      require("telescope").setup()
+      pcall(function()
+        require("telescope").setup()
+      end)
     end,
   },
+
   {
     "gen740/SmoothCursor.nvim",
     config = function()
-      require("smoothcursor").setup()
+      pcall(function()
+        require("smoothcursor").setup()
+      end)
     end,
   },
-  {
-    "karb94/neoscroll.nvim",
-    config = function()
-      require("neoscroll").setup {}
-    end,
-  },
+
   {
     "goolord/alpha-nvim",
+    event = "VimEnter",
     config = function()
-      require("alpha").setup(require("alpha.themes.dashboard").config)
+      pcall(function()
+        require("alpha").setup(require("alpha.themes.dashboard").config)
+      end)
     end,
   },
-  { "folke/tokyonight.nvim" },
-  { "catppuccin/nvim", name = "catppuccin" },
+
+  { "folke/tokyonight.nvim", lazy = true },
+  { "catppuccin/nvim", name = "catppuccin", lazy = true },
 
   --------------------------------------
   -- GIT & DEVTOOLS
   --------------------------------------
-  { "lewis6991/gitsigns.nvim", config = true },
-  { "tpope/vim-fugitive" },
+  { "lewis6991/gitsigns.nvim", event = "BufReadPre", config = true },
+  { "tpope/vim-fugitive", cmd = "G" },
   {
     "vuki656/package-info.nvim",
     ft = "json",
     dependencies = "MunifTanjim/nui.nvim",
     config = function()
-      require("package-info").setup()
+      pcall(function()
+        require("package-info").setup()
+      end)
     end,
   },
-  { "MagicDuck/grug-far.nvim", config = true },
 
   --------------------------------------
   -- MISC UTILS
   --------------------------------------
-  { "echasnovski/mini.comment", version = "*" },
-  { "echasnovski/mini.ai", version = "*" },
-
-  {
-    "windwp/nvim-autopairs",
-    event = "InsertEnter",
-    config = function()
-      require("nvim-autopairs").setup {
-        check_ts = true, -- treesitter-aware
-        map_cr = true,
-        map_bs = true,
-      }
-
-      -- Integrate with nvim-cmp
-      local cmp_autopairs = require "nvim-autopairs.completion.cmp"
-      local cmp = require "cmp"
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-    end,
-  },
-  { "echasnovski/mini.icons", version = "*" },
+  { "echasnovski/mini.icons", event = "VeryLazy" },
   { "folke/persistence.nvim", event = "BufReadPre", config = true },
   { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
-  --
-  -- {
-  --   "windwp/nvim-autopairs",
-  --   event = "InsertEnter",
-  --   config = function()
-  --     require "configs.nvim-autopairs"
-  --   end,
-  -- },
 
   {
     "j-hui/fidget.nvim",
     tag = "legacy",
+    event = "VeryLazy",
     config = function()
-      require("fidget").setup {}
+      pcall(function()
+        require("fidget").setup {}
+      end)
     end,
   },
 }
