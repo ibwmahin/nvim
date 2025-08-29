@@ -1,7 +1,9 @@
 -- ~/.config/nvim/lua/mappings.lua
 -- Robust mappings for NvChad that safely guard optional plugins and avoid runtime errors.
+-- Includes a persistent fix to ensure ';' enters command-line (colon) even if something
+-- else later tries to override it.
 
--- Keep NvChad defaults (do this first)
+-- Keep NvChad defaults (do this first). Use pcall so missing module won't error.
 pcall(function()
   require "nvchad.mappings"
 end)
@@ -9,7 +11,38 @@ end)
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- Basic / Window
+-- ===================================================================
+-- Persistent semicolon->colon mapping:
+-- Ensure ';' opens the command line and re-apply it on common events
+-- in case a plugin or later file rebinds the key.
+-- ===================================================================
+
+local function ensure_semicolon_mapping()
+  -- remove any existing normal-mode mapping for ';' (safe even if none exists)
+  pcall(vim.api.nvim_del_keymap, "n", ";")
+  -- set the reliable mapping
+  vim.keymap.set("n", ";", ":", { noremap = true, desc = "Enter command mode" })
+end
+
+-- apply immediately
+ensure_semicolon_mapping()
+
+-- re-apply on events that often run after mappings are loaded
+local semigroup = vim.api.nvim_create_augroup("EnsureSemicolonMap", { clear = true })
+vim.api.nvim_create_autocmd({ "VimEnter", "BufWinEnter", "ColorScheme" }, {
+  group = semigroup,
+  callback = function()
+    -- small schedule to let other autocommands run first
+    vim.schedule(function()
+      ensure_semicolon_mapping()
+    end)
+  end,
+})
+
+-- ===================================================================
+-- Basic / Window mappings
+-- ===================================================================
+
 map("n", "<leader>sv", "<cmd>vsplit<CR>", { desc = "Vertical Split" })
 map("n", "<leader>sh", "<cmd>split<CR>", { desc = "Horizontal Split" })
 
@@ -20,25 +53,23 @@ map("n", "<C-M-j>", "<cmd>resize +2<CR>", { desc = "Resize split down" })
 map("n", "<C-M-k>", "<cmd>resize -2<CR>", { desc = "Resize split up" })
 
 -- General
-map("n", ";", ":", { desc = "Enter command mode" })
+-- ';;' mapping handled above persistently; keep other mappings
 map("i", "jk", "<ESC>", { desc = "Escape from insert" })
 map({ "n", "i", "v" }, "<C-s>", "<cmd>write<CR>", { desc = "Save file" })
 
--- ----------------------------
+-- ===================================================================
 -- File explorer toggle (Ctrl+b like VS Code)
 -- Works with Neo-tree if installed, otherwise falls back to NvimTree.
--- Behaves:
---  - If in a file: open and reveal the file in explorer (focus it)
---  - If in explorer: close explorer and go back to previous window
--- ----------------------------
+-- - If in a file: open and reveal the file in explorer (focus it)
+-- - If in explorer: close explorer and go back to previous window
+-- ===================================================================
+
 map("n", "<C-b>", function()
-  -- try neo-tree first
+  -- prefer neo-tree if present
   local ok_neotree, neotree_cmd = pcall(require, "neo-tree.command")
   local bufname = vim.api.nvim_buf_get_name(0) or ""
 
   if ok_neotree and neotree_cmd then
-    -- if buffer is an explorer buffer itself, toggle close and go back
-    -- we avoid reveal when bufname is empty (term / no-file)
     if bufname == "" then
       neotree_cmd.execute { toggle = true, reveal_file = false }
     else
@@ -52,10 +83,9 @@ map("n", "<C-b>", function()
   local ok_nt_api, nt_api = pcall(require, "nvim-tree.api")
   if ok_nt_view and ok_nt_api and nt_view.is_visible() then
     nt_api.tree.close()
-    pcall(vim.cmd, "wincmd p") -- go back to previous window
+    pcall(vim.cmd, "wincmd p")
     return
   elseif ok_nt_api then
-    -- if buffer has no name (terminal / empty), don't reveal
     if bufname == "" then
       nt_api.tree.toggle { focus = true, find_file = false }
     else
@@ -64,11 +94,10 @@ map("n", "<C-b>", function()
     return
   end
 
-  -- if neither explorer installed, notify
   vim.notify("No file explorer found (neo-tree or nvim-tree).", vim.log.levels.WARN)
 end, { desc = "Toggle file explorer (Ctrl+b)", silent = true })
 
--- Toggle NvimTree simple (if you still want direct mapping)
+-- Toggle NvimTree simple (optional)
 map("n", "<C-n>", function()
   if pcall(require, "nvim-tree.api") then
     vim.cmd "NvimTreeToggle"
@@ -77,29 +106,41 @@ map("n", "<C-n>", function()
   end
 end, { desc = "Toggle NvimTree", silent = true })
 
+-- ===================================================================
 -- Telescope
-map("n", "<C-p>", "<cmd>Telescope find_files hidden=true<CR>", { desc = "Telescope find files" })
-map("n", "<C-f>", "<cmd>Telescope live_grep<CR>", { desc = "Telescope live grep" })
+-- ===================================================================
+
+map("n", "<C-p>", "<cmd>Telescope find_files hidden=true<CR>", { desc = "Telescope find files", silent = true })
+map("n", "<C-f>", "<cmd>Telescope live_grep<CR>", { desc = "Telescope live grep", silent = true })
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
 map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "Live grep" })
 map("n", "<leader>fb", "<cmd>Telescope buffers<CR>", { desc = "Find buffers" })
 map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", { desc = "Help tags" })
 
--- Multi-cursor / visual-multi (if installed). Ctrl-d selects next occurrence
+-- ===================================================================
+-- Multi-cursor / visual-multi
+-- ===================================================================
+-- Ctrl-d: select next occurrence (works if vim-visual-multi installed)
 map({ "n", "v" }, "<C-d>", "<Plug>(VM-Find-Under)", { silent = true })
 
+-- ===================================================================
 -- Outline (Aerial)
+-- ===================================================================
 map("n", "<leader>o", "<cmd>AerialToggle!<CR>", { desc = "Toggle outline (Aerial)" })
 
+-- ===================================================================
 -- Trouble (diagnostics)
+-- ===================================================================
 map("n", "<leader>xx", "<cmd>TroubleToggle<CR>", { desc = "Toggle Trouble" })
 map("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<CR>", { desc = "Trouble workspace" })
 map("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<CR>", { desc = "Trouble document" })
 
+-- ===================================================================
 -- LSP inline toggle (lsp_lines)
+-- ===================================================================
 map("n", "<leader>le", function()
   local ok, lsp_lines = pcall(require, "lsp_lines")
-  if not ok then
+  if not ok or not lsp_lines then
     vim.diagnostic.config { virtual_text = true }
     vim.notify("lsp_lines not installed; enabled virtual_text", vim.log.levels.INFO)
     return
@@ -118,20 +159,27 @@ map("n", "<leader>le", function()
   end
 end, { desc = "Toggle LSP inline diagnostics" })
 
+-- ===================================================================
 -- Git
+-- ===================================================================
 map("n", "<leader>gs", "<cmd>Neogit<CR>", { desc = "Neogit" })
 map("n", "<leader>gd", "<cmd>DiffviewOpen<CR>", { desc = "Diffview open" })
 map("n", "<leader>gD", "<cmd>DiffviewClose<CR>", { desc = "Diffview close" })
 map("n", "<leader>gb", "<cmd>Gitsigns blame_line<CR>", { desc = "Git blame line" })
 
+-- ===================================================================
 -- Markdown preview
+-- ===================================================================
 map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Markdown preview" })
 
--- Comments & surround (operator mappings provided by plugins)
--- gc / gcc handled by Comment plugin; ys, cs, ds by nvim-surround
+-- ===================================================================
+-- Comments & surround (plugins provide operator mappings; keep theirs)
+-- ===================================================================
+-- gc / gcc by Comment plugin; ys/cs/ds from nvim-surround
 
--- Smart insert behaviour: when pressing 'i' in normal mode, go to 'a' if at EOL, else 'i'
--- Using expr mapping with a Lua function for clarity and safety.
+-- ===================================================================
+-- Smart insert behaviour: 'i' uses 'a' at EOL
+-- ===================================================================
 map("n", "i", function()
   local col = vim.fn.col "."
   local line = vim.fn.getline "." or ""
@@ -142,8 +190,10 @@ map("n", "i", function()
   end
 end, { expr = true, noremap = true, desc = "Smart insert (append at eol)" })
 
--- Helper: neutralize conflicting short <leader>x if you prefer to avoid which-key overlap
--- This safely deletes an existing mapping for <leader>x (normal mode) to prevent which-key warnings.
+-- ===================================================================
+-- Avoid which-key overlap: neutralize short <leader>x if it exists
+-- (keeps which-key warnings away). Safe no-op if no mapping existed.
+-- ===================================================================
 pcall(function()
   vim.api.nvim_del_keymap("n", "<Space>x")
 end)
