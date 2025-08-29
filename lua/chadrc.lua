@@ -1,11 +1,6 @@
 ---@type ChadrcConfig
 local M = {}
 
-vim.cmd [[
-  highlight IndentBlanklineChar guifg=#3b4261 gui=nocombine
-  highlight IndentBlanklineScopeChar guifg=#7aa2f7 gui=nocombine
-]]
-
 M.options = {
   relativenumber = true,
   number = true,
@@ -13,14 +8,38 @@ M.options = {
 
 M.base46 = {
   theme = "catppuccin",
-  -- hl_override = require("custom.highlights").override,
-  hl_override = {
-    Comment = { italic = true },
-    ["@comment"] = { italic = true },
-  },
   transparency = true,
+  hl_override = {
+    -- Base transparent highlight groups
+    Normal = { bg = "NONE" },
+    NormalNC = { bg = "NONE" },
+    NormalFloat = { bg = "NONE" },
+    FloatBorder = { bg = "NONE" },
+    VertSplit = { bg = "NONE" },
+    SignColumn = { bg = "NONE" },
+    MsgArea = { bg = "NONE" },
+
+    -- Statusline and tabline transparency
+    StatusLine = { bg = "NONE" },
+    StatusLineNC = { bg = "NONE" },
+    TabLine = { bg = "NONE" },
+    TabLineSel = { bg = "NONE" },
+    TabLineFill = { bg = "NONE" },
+    BufferLineBackground = { bg = "NONE" },
+    BufferLineFill = { bg = "NONE" },
+
+    -- Other transparent groups
+    TelescopeNormal = { bg = "NONE" },
+    TelescopeBorder = { bg = "NONE" },
+    NvimTreeNormal = { bg = "NONE" },
+    NvimTreeNormalNC = { bg = "NONE" },
+    NvimTreeEndOfBuffer = { bg = "NONE" },
+    NvimTreeWinSeparator = { fg = "NONE", bg = "NONE" },
+    WinBar = { bg = "NONE" },
+    WinBarNC = { bg = "NONE" },
+  },
 }
 
-M.plugins = "plugins" -- loads lua/plugins/init.lua
+M.plugins = "plugins"
 
 return M

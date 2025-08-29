@@ -438,26 +438,26 @@ return {
       end)
     end,
   },
-
-  {
-    "nvim-lualine/lualine.nvim",
-    event = "VeryLazy",
-    config = function()
-      pcall(function()
-        require("lualine").setup()
-      end)
-    end,
-  },
-
-  {
-    "akinsho/bufferline.nvim",
-    event = "VeryLazy",
-    config = function()
-      pcall(function()
-        require "configs.bufferline"
-      end)
-    end,
-  },
+  --
+  -- {
+  --   "nvim-lualine/lualine.nvim",
+  --   event = "VeryLazy",
+  --   config = function()
+  --     pcall(function()
+  --       require("lualine").setup()
+  --     end)
+  --   end,
+  -- },
+  --
+  -- {
+  --   "akinsho/bufferline.nvim",
+  --   event = "VeryLazy",
+  --   config = function()
+  --     pcall(function()
+  --       require "configs.bufferline"
+  --     end)
+  --   end,
+  -- },
 
   { "folke/which-key.nvim", event = "VeryLazy", config = true },
 
