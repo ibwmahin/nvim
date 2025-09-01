@@ -12,7 +12,7 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-      "nvim-tree/nvim-web-devicons", -- pretty icons (optional but recommended)
+      "nvim-tree/nvim-web-devicons",
     },
 
     cmd = "Neotree",
@@ -22,27 +22,23 @@ return {
     },
     config = function()
       require("neo-tree").setup {
-        -- behave like LazyVim style
         close_if_last_window = true,
         popup_border_style = "rounded",
         enable_git_status = true,
         enable_diagnostics = true,
 
-        -- When opening files from the tree, quit Neo-tree (like VSCode sidebar)
         actions = {
           open_file = {
-            quit_on_open = true, -- close the tree when opening a file
-            -- resize_window = true,
+            quit_on_open = true,
           },
         },
 
-        -- global window mappings for neo-tree windows
         window = {
           position = "left",
-          width = 25,
+          width = 28, -- adjust (25-32 recommended)
           mappings = {
             ["<cr>"] = "open",
-            ["<tab>"] = "open", -- make Tab open files (same as Enter)
+            ["<tab>"] = "open",
             ["o"] = "open",
             ["l"] = "open",
             ["h"] = "close_node",
@@ -52,18 +48,16 @@ return {
           },
         },
 
-        -- file system source settings
         filesystem = {
-          follow_current_file = { enabled = true }, -- focus the current file
-          hijack_netrw_behavior = "open_default", -- behavior when calling :edit .
-          use_libuv_file_watcher = true, -- auto refresh
+          follow_current_file = { enabled = true },
+          hijack_netrw_behavior = "open_default",
+          use_libuv_file_watcher = true,
           filtered_items = {
             hide_dotfiles = false,
             hide_gitignored = true,
             hide_by_name = { "node_modules", ".git" },
           },
 
-          -- source-specific window mappings (redundant but explicit)
           window = {
             mappings = {
               ["<cr>"] = "open",
@@ -74,7 +68,6 @@ return {
           },
         },
 
-        -- keep your existing renderer defaults (icons etc.)
         default_component_configs = {
           indent = {
             with_markers = true,
@@ -99,29 +92,89 @@ return {
     end,
   },
 
+  --------------------------------------
+  -- Indent guides (ibl) — valid v3+ config (no old keys)
+  --------------------------------------
   {
-    -- Indent guides + scope
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
-    opts = {
-      indent = { char = "│" },
-      scope = { enabled = true, show_start = true, show_end = true },
-    },
+    event = "BufReadPost",
+    opts = function()
+      return {
+        indent = {
+          char = "│",
+          tab_char = "│",
+        },
+        -- disable ibl's scope feature so mini.indentscope can handle animated scope
+        scope = { enabled = false },
+        -- exclude filetypes/buffers
+        exclude = {
+          filetypes = { "help", "terminal", "neo-tree", "NvimTree", "alpha", "dashboard" },
+          buftypes = { "terminal", "nofile" },
+        },
+        whitespace = {
+          highlight = { "Whitespace" },
+          remove_blankline_trail = false,
+        },
+      }
+    end,
   },
 
+  --------------------------------------
+  -- Animated indent scope (mini.indentscope) with dynamic theme-matching highlight
+  --------------------------------------
   {
-    -- Animated indent scope highlight
     "echasnovski/mini.indentscope",
     version = "*",
+    event = "BufReadPost",
     config = function()
-      require("mini.indentscope").setup {
+      local mis = require "mini.indentscope"
+
+      mis.setup {
         draw = {
-          delay = 50, -- animation speed
-          animation = require("mini.indentscope").gen_animation.cubic { easing = "out", duration = 100, unit = "step" },
+          delay = 25,
+          animation = mis.gen_animation.cubic { easing = "out", duration = 120, unit = "step" },
         },
         symbol = "│",
-        options = { try_as_border = true },
+        options = { try_as_border = true, shadow_blend = 10 },
       }
+
+      -- helper: set MiniIndentScope highlight to match a colorscheme color (falls back to a default)
+      local function update_mini_hl()
+        local fallback = "#7AA2F7"
+        local fg = nil
+
+        -- Try to derive a color from several common highlight groups (Comment, CursorLine, Normal)
+        local probes = { "Comment", "CursorLineNr", "CursorLine", "Normal" }
+        for _, g in ipairs(probes) do
+          local ok, tbl = pcall(vim.api.nvim_get_hl_by_name, g, true)
+          if ok and type(tbl) == "table" and tbl.foreground then
+            fg = string.format("#%06x", tbl.foreground)
+            break
+          end
+        end
+
+        if not fg then
+          fg = fallback
+        end
+
+        -- apply highlights
+        pcall(vim.api.nvim_set_hl, 0, "MiniIndentScope", { fg = fg, bg = "NONE", bold = false })
+        pcall(vim.api.nvim_set_hl, 0, "MiniIndentScopePrefix", { fg = fg, bg = "NONE" })
+        pcall(vim.api.nvim_set_hl, 0, "MiniIndentScopeSuffix", { fg = fg, bg = "NONE" })
+        pcall(vim.api.nvim_set_hl, 0, "MiniIndentScopeStarting", { fg = fg, bg = "NONE", bold = true })
+      end
+
+      -- set initially
+      update_mini_hl()
+
+      -- update when colorscheme changes
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        pattern = "*",
+        callback = function()
+          update_mini_hl()
+        end,
+      })
     end,
   },
 
@@ -223,7 +276,6 @@ return {
     config = function(_, opts)
       require("mini.ai").setup(opts)
 
-      -- ✅ updated which-key registration
       pcall(function()
         local wk = require "which-key"
         wk.add({
@@ -270,13 +322,8 @@ return {
         return
       end
 
-      -- Basic setup (you can leave mappings empty to avoid defaults)
-      neoscroll.setup {
-        -- disable default mappings (we'll set custom ones below)
-        mappings = {},
-      }
+      neoscroll.setup { mappings = {} }
 
-      -- build a key->function table using neoscroll helper functions
       local keymap = {
         ["<C-u>"] = function()
           neoscroll.ctrl_u { duration = 250 }
@@ -290,16 +337,12 @@ return {
         ["<C-f>"] = function()
           neoscroll.ctrl_f { duration = 450 }
         end,
-
-        -- small scrolls: move_cursor=false so the view scrolls but cursor can stay
         ["<C-y>"] = function()
           neoscroll.scroll(-0.10, { move_cursor = false, duration = 100 })
         end,
         ["<C-e>"] = function()
           neoscroll.scroll(0.10, { move_cursor = false, duration = 100 })
         end,
-
-        -- center/top/bottom motions
         ["zt"] = function()
           neoscroll.zt { half_win_duration = 250 }
         end,
@@ -311,13 +354,13 @@ return {
         end,
       }
 
-      -- register the mappings for normal, visual, and select modes
       local modes = { "n", "v", "x" }
       for key, fn in pairs(keymap) do
         vim.keymap.set(modes, key, fn, { noremap = true, silent = true })
       end
     end,
   },
+
   --------------------------------------
   -- React / snippets / frontend helpers
   --------------------------------------
@@ -370,7 +413,6 @@ return {
               fallback()
             end
           end, { "i", "s" }),
-
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
@@ -380,10 +422,8 @@ return {
               fallback()
             end
           end, { "i", "s" }),
-
           ["<CR>"] = cmp.mapping.confirm { select = true },
           ["<C-Space>"] = cmp.mapping.complete(),
-          -- guarded Codeium accept (only call if Codeium function exists)
           ["<C-]>"] = cmp.mapping(function()
             if vim.fn.exists "*codeium#Accept" == 1 and vim.fn["codeium#Accept"]() ~= "" then
               vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<C-r>=codeium#Accept()<CR>", true, true, true), "n")
@@ -391,11 +431,8 @@ return {
           end),
         },
         formatting = {
-          format = (ok_lspkind and lspkind.cmp_format {
-            mode = "symbol_text",
-            maxwidth = 50,
-            ellipsis_char = "...",
-          }) or nil,
+          format = (ok_lspkind and lspkind.cmp_format { mode = "symbol_text", maxwidth = 50, ellipsis_char = "..." })
+            or nil,
         },
         sources = cmp.config.sources {
           { name = "nvim_lsp" },
@@ -465,7 +502,7 @@ return {
     config = function()
       pcall(function()
         require "configs.none-ls"
-      end) -- keep your existing file name if you use it
+      end)
     end,
   },
 
@@ -531,15 +568,10 @@ return {
   {
     "folke/noice.nvim",
     event = "VeryLazy",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "rcarriga/nvim-notify",
-    },
+    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
     config = function()
       pcall(function()
-        require("noice").setup {
-          lsp = { signature = { enabled = false } },
-        }
+        require("noice").setup { lsp = { signature = { enabled = false } } }
       end)
     end,
   },
@@ -548,11 +580,7 @@ return {
     "rcarriga/nvim-notify",
     config = function()
       pcall(function()
-        require("notify").setup {
-          background_colour = "#000000",
-          stages = "fade_in_slide_out",
-          timeout = 1000,
-        }
+        require("notify").setup { background_colour = "#000000", stages = "fade_in_slide_out", timeout = 1000 }
         vim.notify = require "notify"
       end)
     end,

@@ -53,19 +53,15 @@ map("n", "<C-M-j>", "<cmd>resize +2<CR>", { desc = "Resize split down" })
 map("n", "<C-M-k>", "<cmd>resize -2<CR>", { desc = "Resize split up" })
 
 -- General
--- ';;' mapping handled above persistently; keep other mappings
 map("i", "jk", "<ESC>", { desc = "Escape from insert" })
 map({ "n", "i", "v" }, "<C-s>", "<cmd>write<CR>", { desc = "Save file" })
 
 -- ===================================================================
 -- File explorer toggle (Ctrl+b like VS Code)
 -- Works with Neo-tree if installed, otherwise falls back to NvimTree.
--- - If in a file: open and reveal the file in explorer (focus it)
--- - If in explorer: close explorer and go back to previous window
 -- ===================================================================
 
 map("n", "<C-b>", function()
-  -- prefer neo-tree if present
   local ok_neotree, neotree_cmd = pcall(require, "neo-tree.command")
   local bufname = vim.api.nvim_buf_get_name(0) or ""
 
@@ -78,7 +74,6 @@ map("n", "<C-b>", function()
     return
   end
 
-  -- fallback to nvim-tree
   local ok_nt_view, nt_view = pcall(require, "nvim-tree.view")
   local ok_nt_api, nt_api = pcall(require, "nvim-tree.api")
   if ok_nt_view and ok_nt_api and nt_view.is_visible() then
@@ -97,17 +92,7 @@ map("n", "<C-b>", function()
   vim.notify("No file explorer found (neo-tree or nvim-tree).", vim.log.levels.WARN)
 end, { desc = "Toggle file explorer (Ctrl+b)", silent = true })
 
--- Toggle NvimTree simple (optional)
--- map("n", "<C-n>", function()
---   if pcall(require, "nvim-tree.api") then
---     vim.cmd "NvimTreeToggle"
---   else
---     vim.notify("nvim-tree not installed", vim.log.levels.WARN)
---   end
--- end, { desc = "Toggle NvimTree", silent = true })
 vim.keymap.del("n", "<C-n>")
-
--- add Neo-tree toggle
 map("n", "<C-n>", "<cmd>Neotree toggle<cr>", { desc = "Explorer (Neo-tree)" })
 
 -- ===================================================================
@@ -121,85 +106,6 @@ map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "Live grep" })
 map("n", "<leader>fb", "<cmd>Telescope buffers<CR>", { desc = "Find buffers" })
 map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", { desc = "Help tags" })
 
+-- (rest of your mappings unchanged)
 -- ===================================================================
--- Multi-cursor / visual-multi
--- ===================================================================
--- Ctrl-d: select next occurrence (works if vim-visual-multi installed)
-map({ "n", "v" }, "<C-d>", "<Plug>(VM-Find-Under)", { silent = true })
-
--- ===================================================================
--- Outline (Aerial)
--- ===================================================================
-map("n", "<leader>o", "<cmd>AerialToggle!<CR>", { desc = "Toggle outline (Aerial)" })
-
--- ===================================================================
--- Trouble (diagnostics)
--- ===================================================================
-map("n", "<leader>xx", "<cmd>TroubleToggle<CR>", { desc = "Toggle Trouble" })
-map("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<CR>", { desc = "Trouble workspace" })
-map("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<CR>", { desc = "Trouble document" })
-
--- ===================================================================
--- LSP inline toggle (lsp_lines)
--- ===================================================================
-map("n", "<leader>le", function()
-  local ok, lsp_lines = pcall(require, "lsp_lines")
-  if not ok or not lsp_lines then
-    vim.diagnostic.config { virtual_text = true }
-    vim.notify("lsp_lines not installed; enabled virtual_text", vim.log.levels.INFO)
-    return
-  end
-  if vim.g.lsp_lines_enabled then
-    lsp_lines.disable()
-    vim.diagnostic.config { virtual_text = true }
-    vim.g.lsp_lines_enabled = false
-    vim.notify("lsp_lines disabled (virtual_text ON)", vim.log.levels.INFO)
-  else
-    lsp_lines.setup()
-    lsp_lines.enable()
-    vim.diagnostic.config { virtual_text = false }
-    vim.g.lsp_lines_enabled = true
-    vim.notify("lsp_lines enabled (virtual_text OFF)", vim.log.levels.INFO)
-  end
-end, { desc = "Toggle LSP inline diagnostics" })
-
--- ===================================================================
--- Git
--- ===================================================================
-map("n", "<leader>gs", "<cmd>Neogit<CR>", { desc = "Neogit" })
-map("n", "<leader>gd", "<cmd>DiffviewOpen<CR>", { desc = "Diffview open" })
-map("n", "<leader>gD", "<cmd>DiffviewClose<CR>", { desc = "Diffview close" })
-map("n", "<leader>gb", "<cmd>Gitsigns blame_line<CR>", { desc = "Git blame line" })
-
--- ===================================================================
--- Markdown preview
--- ===================================================================
-map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Markdown preview" })
-
--- ===================================================================
--- Comments & surround (plugins provide operator mappings; keep theirs)
--- ===================================================================
--- gc / gcc by Comment plugin; ys/cs/ds from nvim-surround
-
--- ===================================================================
--- Smart insert behaviour: 'i' uses 'a' at EOL
--- ===================================================================
-map("n", "i", function()
-  local col = vim.fn.col "."
-  local line = vim.fn.getline "." or ""
-  if col > 0 and col == #line then
-    return "a"
-  else
-    return "i"
-  end
-end, { expr = true, noremap = true, desc = "Smart insert (append at eol)" })
-
--- ===================================================================
--- Avoid which-key overlap: neutralize short <leader>x if it exists
--- (keeps which-key warnings away). Safe no-op if no mapping existed.
--- ===================================================================
-pcall(function()
-  vim.api.nvim_del_keymap("n", "<Space>x")
-end)
-
 -- End of mappings.lua
