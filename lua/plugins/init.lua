@@ -7,6 +7,125 @@ return {
   -- TODO / SMALL UTILITIES
   --------------------------------------
   {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-tree/nvim-web-devicons", -- pretty icons (optional but recommended)
+    },
+
+    cmd = "Neotree",
+    keys = {
+      { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Explorer" },
+      { "<leader>o", "<cmd>Neotree focus<cr>", desc = "Focus Explorer" },
+    },
+    config = function()
+      require("neo-tree").setup {
+        -- behave like LazyVim style
+        close_if_last_window = true,
+        popup_border_style = "rounded",
+        enable_git_status = true,
+        enable_diagnostics = true,
+
+        -- When opening files from the tree, quit Neo-tree (like VSCode sidebar)
+        actions = {
+          open_file = {
+            quit_on_open = true, -- close the tree when opening a file
+            -- resize_window = true,
+          },
+        },
+
+        -- global window mappings for neo-tree windows
+        window = {
+          position = "left",
+          width = 25,
+          mappings = {
+            ["<cr>"] = "open",
+            ["<tab>"] = "open", -- make Tab open files (same as Enter)
+            ["o"] = "open",
+            ["l"] = "open",
+            ["h"] = "close_node",
+            ["<space>"] = "toggle_node",
+            ["<bs>"] = "navigate_up",
+            ["g?"] = "show_help",
+          },
+        },
+
+        -- file system source settings
+        filesystem = {
+          follow_current_file = { enabled = true }, -- focus the current file
+          hijack_netrw_behavior = "open_default", -- behavior when calling :edit .
+          use_libuv_file_watcher = true, -- auto refresh
+          filtered_items = {
+            hide_dotfiles = false,
+            hide_gitignored = true,
+            hide_by_name = { "node_modules", ".git" },
+          },
+
+          -- source-specific window mappings (redundant but explicit)
+          window = {
+            mappings = {
+              ["<cr>"] = "open",
+              ["<tab>"] = "open",
+              ["l"] = "open",
+              ["h"] = "close_node",
+            },
+          },
+        },
+
+        -- keep your existing renderer defaults (icons etc.)
+        default_component_configs = {
+          indent = {
+            with_markers = true,
+            highlight = "NeoTreeIndentMarker",
+            with_expanders = true,
+          },
+          git_status = {
+            symbols = {
+              added = "",
+              modified = "",
+              deleted = "",
+              renamed = "",
+              untracked = "★",
+              ignored = "◌",
+              unstaged = "✗",
+              staged = "✓",
+              conflict = "",
+            },
+          },
+        },
+      }
+    end,
+  },
+
+  {
+    -- Indent guides + scope
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    opts = {
+      indent = { char = "│" },
+      scope = { enabled = true, show_start = true, show_end = true },
+    },
+  },
+
+  {
+    -- Animated indent scope highlight
+    "echasnovski/mini.indentscope",
+    version = "*",
+    config = function()
+      require("mini.indentscope").setup {
+        draw = {
+          delay = 50, -- animation speed
+          animation = require("mini.indentscope").gen_animation.cubic { easing = "out", duration = 100, unit = "step" },
+        },
+        symbol = "│",
+        options = { try_as_border = true },
+      }
+    end,
+  },
+
+  {
     "folke/todo-comments.nvim",
     event = "BufReadPost",
     opts = {},
@@ -438,40 +557,8 @@ return {
       end)
     end,
   },
-  --
-  -- {
-  --   "nvim-lualine/lualine.nvim",
-  --   event = "VeryLazy",
-  --   config = function()
-  --     pcall(function()
-  --       require("lualine").setup()
-  --     end)
-  --   end,
-  -- },
-  --
-  -- {
-  --   "akinsho/bufferline.nvim",
-  --   event = "VeryLazy",
-  --   config = function()
-  --     pcall(function()
-  --       require "configs.bufferline"
-  --     end)
-  --   end,
-  -- },
 
   { "folke/which-key.nvim", event = "VeryLazy", config = true },
-
-  -- keep NvChad default file explorer (nvim-tree)
-  {
-    "nvim-tree/nvim-tree.lua",
-    cmd = { "NvimTreeToggle", "NvimTreeOpen", "NvimTreeFocus" },
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function()
-      pcall(function()
-        require("nvim-tree").setup {}
-      end)
-    end,
-  },
 
   {
     "nvim-telescope/telescope.nvim",

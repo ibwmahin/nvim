@@ -98,13 +98,17 @@ map("n", "<C-b>", function()
 end, { desc = "Toggle file explorer (Ctrl+b)", silent = true })
 
 -- Toggle NvimTree simple (optional)
-map("n", "<C-n>", function()
-  if pcall(require, "nvim-tree.api") then
-    vim.cmd "NvimTreeToggle"
-  else
-    vim.notify("nvim-tree not installed", vim.log.levels.WARN)
-  end
-end, { desc = "Toggle NvimTree", silent = true })
+-- map("n", "<C-n>", function()
+--   if pcall(require, "nvim-tree.api") then
+--     vim.cmd "NvimTreeToggle"
+--   else
+--     vim.notify("nvim-tree not installed", vim.log.levels.WARN)
+--   end
+-- end, { desc = "Toggle NvimTree", silent = true })
+vim.keymap.del("n", "<C-n>")
+
+-- add Neo-tree toggle
+map("n", "<C-n>", "<cmd>Neotree toggle<cr>", { desc = "Explorer (Neo-tree)" })
 
 -- ===================================================================
 -- Telescope

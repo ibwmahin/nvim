@@ -7,7 +7,7 @@ M.options = {
 }
 
 M.base46 = {
-  theme = "catppuccin",
+  theme = "everblush",
   transparency = true,
   hl_override = {
     -- Base transparent highlight groups
