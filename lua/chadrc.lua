@@ -7,7 +7,7 @@ M.options = {
 }
 
 M.base46 = {
-  theme = "kanagawa",
+  theme = "monekai",
   transparency = true,
   -- hl_override = {
   --   -- Base transparent highlight groups
