@@ -7,7 +7,7 @@ M.options = {
 }
 
 M.base46 = {
-  theme = "catppuccin",
+  theme = "solarized_osaka",
   -- transparency = true,
   -- hl_override = {
   --   -- Base transparent highlight groups
@@ -40,6 +40,8 @@ M.base46 = {
   -- },
 }
 
+-- in your main config entrypoint (e.g., init.lua or chadrc.lua)
+pcall(function() require("custom.ui") end)
 M.plugins = "plugins"
 
 return M
