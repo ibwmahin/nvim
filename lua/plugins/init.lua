@@ -14,7 +14,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       pcall(function()
-        require("bufferline").setup({
+        require("bufferline").setup {
           options = {
             numbers = "none",
             indicator = { icon = "▎", style = "icon" },
@@ -25,36 +25,7 @@ return {
             separator_style = "thin",
             always_show_bufferline = true,
           },
-        })
-      end)
-    end,
-  },
-
-
-  -- Dim inactive windows
-  {
-    "sunjon/shade.nvim",
-    event = "VeryLazy",
-    config = function()
-      pcall(function()
-        require("shade").setup({
-          overlay_opacity = 60,
-          opacity_step = 1,
-          keys = { -- optional toggle
-            disable = {},
-          }
-        })
-      end)
-    end,
-  },
-
-  -- Transparent background toggle
-  {
-    "xiyaowong/transparent.nvim",
-    event = "VimEnter",
-    config = function()
-      pcall(function()
-        require("transparent").setup({ enable = true, extra_groups = { "NormalFloat", "NvimTreeNormal" } })
+        }
       end)
     end,
   },
@@ -64,10 +35,11 @@ return {
     "stevearc/dressing.nvim",
     event = "VeryLazy",
     config = function()
-      pcall(function() require("dressing").setup() end)
+      pcall(function()
+        require("dressing").setup()
+      end)
     end,
   },
-
 
   --------------------------------------
   -- TODO / SMALL UTILITIES
@@ -84,7 +56,7 @@ return {
     cmd = "Neotree",
     keys = {
       { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Explorer" },
-      { "<leader>o", "<cmd>Neotree focus<cr>",  desc = "Focus Explorer" },
+      { "<leader>o", "<cmd>Neotree focus<cr>", desc = "Focus Explorer" },
     },
     config = function()
       require("neo-tree").setup {
@@ -263,8 +235,8 @@ return {
         end,
         desc = "Previous Todo Comment",
       },
-      { "<leader>xt", "<cmd>Trouble todo toggle<cr>",                   desc = "Todo (Trouble)" },
-      { "<leader>st", "<cmd>TodoTelescope<cr>",                         desc = "Todo (Telescope)" },
+      { "<leader>xt", "<cmd>Trouble todo toggle<cr>", desc = "Todo (Trouble)" },
+      { "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Todo (Telescope)" },
       { "<leader>sT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme (Telescope)" },
     },
   },
@@ -276,9 +248,9 @@ return {
     opts = {
       library = {
         { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-        { path = "LazyVim",            words = { "LazyVim" } },
-        { path = "snacks.nvim",        words = { "Snacks" } },
-        { path = "lazy.nvim",          words = { "LazyVim" } },
+        { path = "LazyVim", words = { "LazyVim" } },
+        { path = "snacks.nvim", words = { "Snacks" } },
+        { path = "lazy.nvim", words = { "LazyVim" } },
       },
     },
   },
@@ -498,7 +470,7 @@ return {
         },
         formatting = {
           format = (ok_lspkind and lspkind.cmp_format { mode = "symbol_text", maxwidth = 50, ellipsis_char = "..." })
-              or nil,
+            or nil,
         },
         sources = cmp.config.sources {
           { name = "nvim_lsp" },
@@ -547,7 +519,7 @@ return {
     end,
   },
 
-  { "williamboman/mason.nvim",           config = true },
+  { "williamboman/mason.nvim", config = true },
   { "williamboman/mason-lspconfig.nvim", config = true },
   { "jose-elias-alvarez/typescript.nvim" },
 
@@ -602,7 +574,7 @@ return {
       end)
     end,
   },
-  { "nvim-treesitter/nvim-treesitter-context",    config = true },
+  { "nvim-treesitter/nvim-treesitter-context", config = true },
   { "nvim-treesitter/nvim-treesitter-textobjects" },
 
   {
@@ -652,7 +624,7 @@ return {
     end,
   },
 
-  { "folke/which-key.nvim",    event = "VeryLazy",   config = true },
+  { "folke/which-key.nvim", event = "VeryLazy", config = true },
 
   {
     "nvim-telescope/telescope.nvim",
@@ -685,14 +657,14 @@ return {
     end,
   },
 
-  { "folke/tokyonight.nvim",   lazy = true },
-  { "catppuccin/nvim",         name = "catppuccin",  lazy = true },
+  { "folke/tokyonight.nvim", lazy = true },
+  { "catppuccin/nvim", name = "catppuccin", lazy = true },
 
   --------------------------------------
   -- GIT & DEVTOOLS
   --------------------------------------
   { "lewis6991/gitsigns.nvim", event = "BufReadPre", config = true },
-  { "tpope/vim-fugitive",      cmd = "G" },
+  { "tpope/vim-fugitive", cmd = "G" },
   {
     "vuki656/package-info.nvim",
     ft = "json",
@@ -707,8 +679,8 @@ return {
   --------------------------------------
   -- MISC UTILS
   --------------------------------------
-  { "echasnovski/mini.icons",                      event = "VeryLazy" },
-  { "folke/persistence.nvim",                      event = "BufReadPre", config = true },
+  { "echasnovski/mini.icons", event = "VeryLazy" },
+  { "folke/persistence.nvim", event = "BufReadPre", config = true },
   { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
 
   {
