@@ -7,8 +7,8 @@ M.options = {
 }
 
 M.base46 = {
-  theme = "monekai",
-  transparency = true,
+  theme = "catppuccin",
+  -- transparency = true,
   -- hl_override = {
   --   -- Base transparent highlight groups
   --   Normal = { bg = "NONE" },
