@@ -41,7 +41,9 @@ M.base46 = {
 }
 
 -- in your main config entrypoint (e.g., init.lua or chadrc.lua)
-pcall(function() require("custom.ui") end)
+pcall(function()
+  require "custom.ui"
+end)
 M.plugins = "plugins"
 
 return M
