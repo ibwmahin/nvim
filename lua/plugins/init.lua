@@ -4,7 +4,26 @@
 
 return {
   -- new plugins
+  "nvim-lua/plenary.nvim",
+  { "nvim-tree/nvim-web-devicons", lazy = true },
 
+  {
+    "nvchad/ui",
+    config = function()
+      require "nvchad"
+    end,
+  },
+
+  {
+    "nvchad/base46",
+    lazy = true,
+    build = function()
+      require("base46").load_all_highlights()
+    end,
+  },
+
+  "nvchad/volt", -- optional, needed for theme switcher
+  -- or just use Telescope themes
   -- Bufferline (tabs / buffers)
 
   {
@@ -170,7 +189,7 @@ return {
 
       mis.setup {
         draw = {
-          delay = 25,
+          delay = 5,
           animation = mis.gen_animation.cubic { easing = "out", duration = 120, unit = "step" },
         },
         symbol = "│",
@@ -647,15 +666,15 @@ return {
     end,
   },
 
-  {
-    "goolord/alpha-nvim",
-    event = "VimEnter",
-    config = function()
-      pcall(function()
-        require("alpha").setup(require("alpha.themes.dashboard").config)
-      end)
-    end,
-  },
+  -- {
+  --   "goolord/alpha-nvim",
+  --   event = "VimEnter",
+  --   config = function()
+  --     pcall(function()
+  --       require("alpha").setup(require("alpha.themes.dashboard").config)
+  --     end)
+  --   end,
+  -- },
 
   { "folke/tokyonight.nvim", lazy = true },
   { "catppuccin/nvim", name = "catppuccin", lazy = true },

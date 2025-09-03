@@ -1,49 +1,119 @@
----@type ChadrcConfig
-local M = {}
+local options = {
 
-M.options = {
-  relativenumber = true,
-  number = true,
-}
+  base46 = {
+    theme = "vesper", -- default theme
+    hl_add = {},
+    hl_override = {},
+    integrations = {},
+    changed_themes = {},
+    transparency = true,
+  },
 
-M.base46 = {
-  theme = "solarized_osaka",
-  transparency = true,
-  hl_override = {
-    -- Base transparent highlight groups
-    Normal = { bg = "NONE" },
-    NormalNC = { bg = "NONE" },
-    NormalFloat = { bg = "NONE" },
-    FloatBorder = { bg = "NONE" },
-    VertSplit = { bg = "NONE" },
-    SignColumn = { bg = "NONE" },
-    MsgArea = { bg = "NONE" },
+  ui = {
+    cmp = {
+      icons_left = false, -- only for non-atom styles!
+      style = "default", -- default/flat_light/flat_dark/atom/atom_colored
+      abbr_maxwidth = 60,
+      -- for tailwind, css lsp etc
+      format_colors = { lsp = true, icon = "󱓻" },
+    },
 
-    -- Statusline and tabline transparency
-    StatusLine = { bg = "NONE" },
-    StatusLineNC = { bg = "NONE" },
-    TabLine = { bg = "NONE" },
-    TabLineSel = { bg = "NONE" },
-    TabLineFill = { bg = "NONE" },
-    BufferLineBackground = { bg = "NONE" },
-    BufferLineFill = { bg = "NONE" },
+    telescope = { style = "borderless" }, -- borderless / bordered
 
-    -- Other transparent groups
-    TelescopeNormal = { bg = "NONE" },
-    TelescopeBorder = { bg = "NONE" },
-    NvimTreeNormal = { bg = "NONE" },
-    NvimTreeNormalNC = { bg = "NONE" },
-    NvimTreeEndOfBuffer = { bg = "NONE" },
-    NvimTreeWinSeparator = { fg = "NONE", bg = "NONE" },
-    WinBar = { bg = "NONE" },
-    WinBarNC = { bg = "NONE" },
+    statusline = {
+      enabled = true,
+      theme = "vscode_colored",
+      --Main Themes: default/vscode/vscode_colored/minimal
+
+      --Separators: default/round/block/arrow separators work only for default statusline theme
+
+      --Separators round and block will work for minimal theme only
+
+      separator_style = "default",
+      order = nil,
+      modules = nil,
+    },
+
+    -- lazyload it when there are 1+ buffers
+    tabufline = {
+      enabled = true,
+      lazyload = true,
+      order = { "treeOffset", "buffers", "tabs", "btns" },
+      modules = nil,
+      bufwidth = 21,
+    },
+  },
+
+  nvdash = {
+    load_on_startup = true,
+    header = {
+      "                      ",
+      "  ▄▄         ▄ ▄▄▄▄▄▄▄",
+      "▄▀███▄     ▄██ █████▀ ",
+      "██▄▀███▄   ███        ",
+      "███  ▀███▄ ███        ",
+      "███    ▀██ ███        ",
+      "███      ▀ ███        ",
+      "▀██ █████▄▀█▀▄██████▄ ",
+      "  ▀ ▀▀▀▀▀▀▀ ▀▀▀▀▀▀▀▀▀▀",
+      "                      ",
+      "  Powered By  eovim ",
+      "                      ",
+    },
+
+    buttons = {
+      { txt = "  Find File", keys = "ff", cmd = "Telescope find_files" },
+      { txt = "  Recent Files", keys = "fo", cmd = "Telescope oldfiles" },
+      { txt = "󰈭  Find Word", keys = "fw", cmd = "Telescope live_grep" },
+      { txt = "󱥚  Themes", keys = "th", cmd = ":lua require('nvchad.themes').open()" },
+      { txt = "  Mappings", keys = "ch", cmd = "NvCheatsheet" },
+
+      { txt = "─", hl = "NvDashFooter", no_gap = true, rep = true, align = "left" },
+
+      {
+        txt = function()
+          local stats = require("lazy").stats()
+          local ms = math.floor(stats.startuptime) .. " ms"
+          return "  Loaded " .. stats.loaded .. "/" .. stats.count .. " plugins in " .. ms
+        end,
+        hl = "NvDashFooter",
+        no_gap = true,
+      },
+
+      { txt = "─", hl = "NvDashFooter", no_gap = true, rep = true, align = "left" },
+    },
+  },
+
+  term = {
+    base46_colors = true,
+    winopts = { number = false, relativenumber = false },
+    sizes = { sp = 0.3, vsp = 0.2, ["bo sp"] = 0.3, ["bo vsp"] = 0.2 },
+    float = {
+      relative = "editor",
+      row = 0.3,
+      col = 0.25,
+      width = 0.5,
+      height = 0.4,
+      border = "single",
+    },
+  },
+
+  lsp = { signature = true },
+
+  cheatsheet = {
+    theme = "grid", -- simple/grid
+    excluded_groups = { "terminal (t)", "autopairs", "Nvim", "Opens" }, -- can add group name or with mode
+  },
+
+  mason = { pkgs = {}, skip = {} },
+
+  colorify = {
+    enabled = true,
+    mode = "virtual", -- fg, bg, virtual
+    virt_text = "󱓻 ",
+    highlight = { hex = true, lspvars = true },
   },
 }
 
--- in your main config entrypoint (e.g., init.lua or chadrc.lua)
-pcall(function()
-  require "custom.ui"
-end)
-M.plugins = "plugins"
-
-return M
+local status, chadrc = pcall(require, "chadrc")
+return vim.tbl_deep_extend("force", options, status and chadrc or {})
