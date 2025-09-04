@@ -3,6 +3,7 @@
 -- and fixes events / configs so this loads cleanly in NvChad.
 
 return {
+
   -- new plugins
   "nvim-lua/plenary.nvim",
   { "nvim-tree/nvim-web-devicons", lazy = true },
@@ -91,8 +92,8 @@ return {
         },
 
         window = {
-          position = "left",
-          width = 28, -- adjust (25-32 recommended)
+          position = "right",
+          width = 25, -- adjust (25-32 recommended)
           mappings = {
             ["<cr>"] = "open",
             ["<tab>"] = "open",

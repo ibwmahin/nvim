@@ -1,35 +1,36 @@
 local options = {
 
   base46 = {
-    theme = "vesper", -- default theme
+    theme = "catppuccin", -- default theme
     hl_add = {},
     hl_override = {},
     integrations = {},
     changed_themes = {},
-    transparency = true,
+    transparency = false,
   },
 
   ui = {
     cmp = {
-      icons_left = false, -- only for non-atom styles!
-      style = "default", -- default/flat_light/flat_dark/atom/atom_colored
+      icons_left = true, -- only for non-atom styles!
+      style = "atom_colored",
+      -- default/flat_light/flat_dark/atom/atom_colored
       abbr_maxwidth = 60,
       -- for tailwind, css lsp etc
       format_colors = { lsp = true, icon = "󱓻" },
     },
 
-    telescope = { style = "borderless" }, -- borderless / bordered
+    telescope = { style = "bordered" }, -- borderless / bordered
 
     statusline = {
       enabled = true,
-      theme = "vscode_colored",
+      theme = "default",
       --Main Themes: default/vscode/vscode_colored/minimal
 
       --Separators: default/round/block/arrow separators work only for default statusline theme
 
       --Separators round and block will work for minimal theme only
 
-      separator_style = "default",
+      separator_style = "arrow",
       order = nil,
       modules = nil,
     },
@@ -57,7 +58,7 @@ local options = {
       "▀██ █████▄▀█▀▄██████▄ ",
       "  ▀ ▀▀▀▀▀▀▀ ▀▀▀▀▀▀▀▀▀▀",
       "                      ",
-      "  Powered By  eovim ",
+      "  Welcome to  eovim ",
       "                      ",
     },
 
@@ -67,7 +68,6 @@ local options = {
       { txt = "󰈭  Find Word", keys = "fw", cmd = "Telescope live_grep" },
       { txt = "󱥚  Themes", keys = "th", cmd = ":lua require('nvchad.themes').open()" },
       { txt = "  Mappings", keys = "ch", cmd = "NvCheatsheet" },
-
       { txt = "─", hl = "NvDashFooter", no_gap = true, rep = true, align = "left" },
 
       {
