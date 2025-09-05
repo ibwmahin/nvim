@@ -6,12 +6,12 @@ local options = {
     hl_override = {},
     integrations = {},
     changed_themes = {},
-    transparency = false,
+    transparency = true,
   },
 
   ui = {
     cmp = {
-      icons_left = true, -- only for non-atom styles!
+      icons_left = false, -- only for non-atom styles!
       style = "atom_colored",
       -- default/flat_light/flat_dark/atom/atom_colored
       abbr_maxwidth = 60,
